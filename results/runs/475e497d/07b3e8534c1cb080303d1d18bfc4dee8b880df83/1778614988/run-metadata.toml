@@ -1,0 +1,60 @@
+run-id = "1778614988"
+machine-id = "475e497d"
+git-sha = "07b3e8534c1cb080303d1d18bfc4dee8b880df83"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-12T19:43:08Z"
+finished-at = "2026-05-12T20:36:39Z"
+duration-secs = 3211
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-59-generic"
+cpu-governor = "schedutil"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 51
+numactl-binding = "none"
+batch-sizes = [1]
+device = "cpu"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/475e497d/1778614988"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "657275b3b68fa273f063ab230e92bac226027a9c3adf9c3b60d0f8392c50b164"
+  bytes  = 1391006
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "2bd168ac98ad878971bcf3f773031d6d3bd31c13143e8ca7cf35c74ad8f654c3"
+  bytes  = 1350918
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = false
+build-duration-secs = 3.63258876
+cluster-count = 1
+m-total = 100000
+
+[scheme-config]
+beta-values = [0.0, 0.1, 0.5, 1.0]
+scheme = "sap"
+upload-seed = 42
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

@@ -1,0 +1,19 @@
+\begin{tikzpicture}
+  \begin{axis}[
+    xmode=log, log basis x=2, ymode=log,
+    xlabel={nprobe},
+    ylabel={mean latency (ms)},
+    title={\texttt{bntm-ivf}: latency vs nprobe},
+    legend columns=3,
+  ]
+    \foreach \slug/\dlabel in \canonicalSeries {%
+      \IfFileExists{\datadir/01-latency-vs-nprobe-bntm-ivf-\slug.tsv}{%
+        \edef\xtemp{%
+          \noexpand\addplot+ table[x=nprobe, y=latency_ms]
+            {\datadir/01-latency-vs-nprobe-bntm-ivf-\slug.tsv};%
+          \noexpand\addlegendentry{\dlabel}%
+        }\xtemp
+      }{}%
+    }
+  \end{axis}
+\end{tikzpicture}

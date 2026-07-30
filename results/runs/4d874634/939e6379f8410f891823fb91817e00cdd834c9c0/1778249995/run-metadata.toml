@@ -1,0 +1,53 @@
+run-id = "1778249995"
+machine-id = "4d874634"
+git-sha = "939e6379f8410f891823fb91817e00cdd834c9c0"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-08T14:19:55Z"
+finished-at = "2026-05-08T15:04:45Z"
+duration-secs = 2690
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-110-generic"
+cpu-governor = "performance"
+notes = ""
+parallel-threads = 1
+numactl-binding = "physcpubind=0-15,membind=0"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/4d874634/1778249995"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "da3fed10c27c099e86ce702ea7480b050c506561d98b3752e41d9fef5dda3975"
+  bytes  = 133106
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "21bf30436b2032a79b30b39b9d40d61345a2f31a695c4684c7c0ed1eb361400f"
+  bytes  = 408976
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[scheme-config]
+go-commit = "ba7cae43ab8686328897aabd3b7f861622d8ac8a"
+go-toolchain = "go version go1.21.9 linux/amd64"
+hint-mb = 25
+ivf-source = "matched-with-tiptoe"
+quantisation-bits = 3
+scheme = "tiptoe-go"
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

@@ -1,0 +1,110 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % --------------------------------------------------------------------
+  % Two-panel variant of figure 03 — used when the with-offline class
+  % is empty on this machine (no \tiptoe data). Same comm-bars style,
+  % shared y-scale, and shared legend as the 3-panel original; just
+  % drops the Offline ↑/↓ legend entries and panel 3 entirely.
+  %
+  %   Panel 1 (left):   online-only      -- plaintext, sap, sap-ivf
+  %     2 bars: query, response.
+  %   Panel 2 (right):  with-setup       -- bntm{,-ivf}, emvp{,-ivf}
+  %     3 bars: query, response, setup.
+  %
+  % analysis/report.py picks between this template and the 3-panel
+  % default at copy-into-report time, based on whether
+  % data/communication-with-offline.tsv has any non-zero rows.
+  % --------------------------------------------------------------------
+  \pgfplotsset{
+    /pgfplots/comm-bars/.style={
+      bar cycle list/.style={cycle list/Paired-12},
+      ybar,
+      every axis plot/.append style={fill, fill opacity=0.85},
+      ymode=log,
+      log origin=infty,
+      ymin=1, ymax=2e9,
+      ytick={10,2^10,100*2^10,10*2^20,2^30},
+      yticklabels={10\,B, 1\,KiB, 100\,KiB, 10\,MiB, 1\,GiB},
+      bar width=4pt,
+      xtick=data,
+      height=2in,
+      ylabel={Bytes (log scale)},
+      ylabel style={font=\sffamily\footnotesize},
+      x tick label style={
+        rotate=35, anchor=north east, font=\sffamily\footnotesize,
+      },
+      y tick label style={font=\sffamily\footnotesize},
+      title style={font=\sffamily\footnotesize, yshift=-2pt},
+    },
+  }
+
+  \pgfplotstableread[col sep=tab]{\datadir/communication-online-only.tsv}\commOnlineOnly
+  \pgfplotstableread[col sep=tab]{\datadir/communication-with-setup.tsv}\commWithSetup
+
+  \begin{groupplot}[
+    group style={
+      group size=2 by 1,
+      horizontal sep=0.7cm,
+      y descriptions at=edge left,
+    },
+    comm-bars,
+  ]
+
+  % --------------------------------------------------------------------
+  % Panel 1 (left) - online-only: 2 bars per scheme. Hosts the shared
+  % 3-entry legend (no Offline ↑/↓ — those are dropped here since no
+  % bar in this figure represents them).
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    title={online-only},
+    xticklabels from table={\commOnlineOnly}{scheme},
+    width=0.4\linewidth,
+    legend to name=commlegend,
+    legend columns=3,
+    legend style={
+      draw=none, fill=white, font=\sffamily\footnotesize,
+      /tikz/every even column/.append style={column sep=3pt},
+    },
+    enlarge x limits=0.4,
+  ]
+    \addlegendimage{ybar legend, fill=Paired-A, fill opacity=0.85, draw=Paired-A}
+    \addlegendentry{Query ($\uparrow$)}
+    \addlegendimage{ybar legend, fill=Paired-B, fill opacity=0.85, draw=Paired-B}
+    \addlegendentry{Response ($\downarrow$, /cluster)}
+    \addlegendimage{ybar legend, fill=Paired-C, fill opacity=0.85, draw=Paired-C}
+    \addlegendentry{Setup (one-time)}
+
+    \IfFileExists{\datadir/communication-online-only.tsv}{%
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=query_bytes]            {\commOnlineOnly};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=cluster_response_bytes] {\commOnlineOnly};
+    }{\node {no data};}
+
+  % --------------------------------------------------------------------
+  % Panel 2 (right) - with-setup: 3 bars per scheme.
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    title={with one-time setup},
+    xticklabels from table={\commWithSetup}{scheme},
+    width=0.55\linewidth,
+    enlarge x limits=0.34,
+  ]
+    \IfFileExists{\datadir/communication-with-setup.tsv}{%
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=query_bytes]            {\commWithSetup};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=cluster_response_bytes] {\commWithSetup};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=setup_bytes]            {\commWithSetup};
+    }{\node {no data};}
+
+  \end{groupplot}
+
+  % Shared legend, centred above the midpoint of the two panels.
+  % yshift kept at 14pt so the legend swatches clear each panel's
+  % title text — 4pt was too tight and the keys overlapped the
+  % titles in the 2-panel layout. `\ref{commlegend}` needs a second
+  % compile pass to resolve; latexmk handles that.
+  \node[anchor=south, inner sep=0pt, yshift=14pt]
+    at ($(group c1r1.north)!0.5!(group c2r1.north)$) {\ref{commlegend}};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,89 @@
+run-id = "1778652649"
+machine-id = "b7b855dc"
+git-sha = "6f5c4a21efa4725677124011846d326f9c18c2c3"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-13T06:10:49Z"
+finished-at = "2026-05-13T06:18:46Z"
+duration-secs = 477
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-59-generic"
+cpu-governor = "schedutil"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 56
+numactl-binding = "none"
+batch-sizes = [1]
+device = "gpu"
+
+[campaign]
+id = "plan23-step9-gpu-2026-05-12"
+title = "Plan 23 step 9 — figure 14 production sweep"
+note = "RCP V100, interactive (no 2h GPU-idle reclaim)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/b7b855dc/1778652649"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "df61415275ebf8c35aff0767b25650c6b1966918a1337081900c160361c44db8"
+  bytes  = 3170618
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "f396d54ab57be5a474b010522ddce6f20207461f5373c7dc2fad78cc282dd174"
+  bytes  = 2431656
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 11.014963945
+cluster-count = 317
+m-total = 100000
+
+[gpu]
+sku = "v100"
+location = "cloud"
+memory-bytes = 34359738368
+
+[gpu.cloud]
+provider = "epfl-rcp"
+instance-type = "rcp-runai-v100"
+region = "epfl"
+driver-version = "580.82.07"
+cuda-version = "12.4.1"
+
+[scheme-config]
+b = 17
+ell0 = 1024
+k = 268
+key-seed = "42*32"
+max-iter = 25
+n = 1292
+n-centroids = 317
+nprobe-values = [1, 2, 4, 8, 16, 32, 64, 128]
+params = "Sec128"
+quantisation-q = 1048576
+s = 76
+scheme = "emvp-ivf"
+train-seed = 42
+trapdoor = "option-b-placeholder-r"
+upload-seed = 7
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

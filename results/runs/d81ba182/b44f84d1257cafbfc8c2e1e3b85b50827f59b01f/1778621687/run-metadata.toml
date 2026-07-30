@@ -1,0 +1,82 @@
+run-id = "1778621687"
+machine-id = "d81ba182"
+git-sha = "b44f84d1257cafbfc8c2e1e3b85b50827f59b01f"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-12T21:34:47Z"
+finished-at = "2026-05-12T21:35:38Z"
+duration-secs = 51
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "unknown"
+cpu-governor = "unknown"
+notes = ""
+no-cache = false
+breakdown = true
+parallel-threads = 10
+numactl-binding = "none"
+batch-sizes = [1]
+device = "cpu"
+
+[campaign]
+id = "mini-resume-2026-05-11"
+title = "Mini resume — cold + breakdown + BN-no-verify"
+note = "Resume after interruption; eval-resume-mini-1778535181, 33h 58m wall; tiptoe-go skipped (Go 1.26 vs simplepir incompat)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/d81ba182/1778621687"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "980d99e591dd0e8daa225653a5aa6023b8e4214fa733c3dc79bfd5c1d2c184da"
+  bytes  = 326
+
+  [[bulk.files]]
+  name   = "substep-breakdown.csv"
+  sha256 = "488ce268aa6361c3c6067871d74d488800508a2539ecc09b671ea375e9bd7147"
+  bytes  = 456324
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "41fdd2e6a7ee220eb06f28520aa13b97043271c136e349cb58cd6877cd046c47"
+  bytes  = 307748
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 0.8530875
+cluster-count = 317
+m-total = 100000
+
+[scheme-config]
+b = 17
+ell0 = 1024
+k = 268
+key-seed = "42*32"
+max-iter = 25
+n = 1292
+n-centroids = 317
+nprobe-values = [32]
+params = "Sec128"
+quantisation-q = 1048576
+s = 76
+scheme = "emvp-ivf"
+train-seed = 42
+trapdoor = "option-b-placeholder-r"
+upload-seed = 7
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

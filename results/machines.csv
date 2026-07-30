@@ -1,0 +1,18 @@
+machine-id,machine-name,cpu-model,cores,ram-bytes,os,kernel-version,cpu-governor,gpu-kind
+d81ba182,mini,Apple M4,10,25769803776,Mac OS 26.3.1,unknown,unknown,none
+1ad4534f,laptop,Apple M4 Pro,12,51539607552,Mac OS 26.4.1,unknown,unknown,none
+4d874634,sacs006,Intel(R) Xeon(R) Gold 6426Y,64,134820798464,Ubuntu 24.4.0,6.8.0-110-generic,schedutil,cuda
+ff4986e1,gpu202.rcp,Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz,72,404273881088,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,cuda
+79da1f38,gpu003.rcp,AMD EPYC 7543 32-Core Processor,128,1081885065216,Ubuntu 22.4.0,6.8.0-59-generic,unknown,none
+ee8fb9ad,gpu206.rcp,Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz,72,404273893376,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,none
+ab40f28c,gpu201.rcp,Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz,72,404273897472,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,none
+d1c63f0b,gpu209.rcp,Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz,72,404273913856,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,none
+9ce6cd05,gpu261.rcp,Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz,56,404284018688,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,cuda
+7444f7f2,sacs006,Intel(R) Xeon(R) Gold 6426Y,64,134820790272,Ubuntu 24.4.0,6.8.0-111-generic,schedutil,none
+475e497d,gpu252.rcp,Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz,56,404284022784,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,none
+bbcbcaef,gpu018.rcp,AMD EPYC 7543 32-Core Processor,128,1081884999680,Ubuntu 22.4.0,6.8.0-59-generic,unknown,none
+b7b855dc,gpu255.rcp,Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz,56,404284002304,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,none
+ac1bfa6f,gpu219.rcp,Intel(R) Xeon(R) Gold 6240 CPU @ 2.60GHz,72,404273872896,Ubuntu 22.4.0,6.8.0-59-generic,unknown,none
+3b4b9665,gpu260.rcp,Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz,56,404283985920,Ubuntu 22.4.0,6.8.0-59-generic,schedutil,none
+d860be76,sacs006,Intel(R) Xeon(R) Gold 6426Y,64,134820773888,Ubuntu 24.4.0,6.8.0-111-generic,schedutil,cuda
+64451e77,sacs006,Intel(R) Xeon(R) Gold 6426Y,64,134820814848,Ubuntu 24.4.0,6.8.0-124-generic,performance,none

@@ -1,0 +1,14 @@
+[package]
+name = "ivf-index"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rayon       = { workspace = true }
+scorer-core = { workspace = true }
+rand        = { workspace = true }
+rand_chacha = { workspace = true }
+# Plan 25 step 6 — `l2_f32_simd` (sum-of-squares SIMD). Code added but
+# not yet wired into the hot path; the dispatcher swap waits for the
+# step 6 per-site micro-bench to confirm >1.0× over LLVM auto-vec.
+wide        = { workspace = true }

@@ -1,0 +1,67 @@
+run-id = "1778611276"
+machine-id = "d860be76"
+git-sha = "b44f84d1257cafbfc8c2e1e3b85b50827f59b01f"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-12T18:41:16Z"
+finished-at = "2026-05-12T18:45:17Z"
+duration-secs = 241
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-111-generic"
+cpu-governor = "schedutil"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1, 8, 64, 256]
+device = "cpu"
+
+[campaign]
+id = "plan23-step9-cpu-2026-05-12"
+title = "Plan 23 step 9 — figure 14 production sweep"
+note = "sacs006 local sweep + eval-scaling;\n  pre-CAMPAIGN-forwarding-fix"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/d860be76/1778611276"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "4320e9250cad80f46f92b44b6925242a95d7479e4d050f2024593979ea6bf93b"
+  bytes  = 10155307
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "c1fad69db710f09dbeeacf1a581fa248b46e0812513c4b3ac4aadf44c0a6fca5"
+  bytes  = 2511693
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 0.528507343
+cluster-count = 317
+m-total = 100000
+
+[scheme-config]
+max-iter = 25
+n-centroids = 317
+nprobe-values = [1, 2, 4, 8, 16, 32, 64, 128]
+scheme = "plaintext"
+train-seed = 42
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

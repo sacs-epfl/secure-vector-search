@@ -1,0 +1,87 @@
+run-id = "1778658751"
+machine-id = "b7b855dc"
+git-sha = "6f5c4a21efa4725677124011846d326f9c18c2c3"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-13T07:52:31Z"
+finished-at = "2026-05-13T07:52:43Z"
+duration-secs = 12
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-59-generic"
+cpu-governor = "schedutil"
+notes = ""
+no-cache = false
+breakdown = true
+parallel-threads = 56
+numactl-binding = "none"
+batch-sizes = [1]
+device = "gpu"
+
+[campaign]
+id = "plan23-step9-gpu-2026-05-12"
+title = "Plan 23 step 9 — figure 14 production sweep"
+note = "RCP V100, interactive (no 2h GPU-idle reclaim)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/b7b855dc/1778658751"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "980d99e591dd0e8daa225653a5aa6023b8e4214fa733c3dc79bfd5c1d2c184da"
+  bytes  = 326
+
+  [[bulk.files]]
+  name   = "substep-breakdown.csv"
+  sha256 = "a175f23e15cdd132bdd83ead7bc3ec0e85bdb317e508bf88817b61509483a2f1"
+  bytes  = 526329
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "58e88b75f53ccd45a3ada7533fd28e254dc9a3697e2241d5c45062a438347766"
+  bytes  = 437742
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 2.240638785
+cluster-count = 317
+m-total = 100000
+
+[gpu]
+sku = "v100"
+location = "cloud"
+memory-bytes = 34359738368
+
+[gpu.cloud]
+provider = "epfl-rcp"
+instance-type = "rcp-runai-v100"
+region = "epfl"
+driver-version = "580.82.07"
+cuda-version = "12.4.1"
+
+[scheme-config]
+beta-fixed = 0.0
+max-iter = 25
+n-centroids = 317
+nprobe-values = [32]
+scheme = "sap-ivf"
+sweep = "nprobe"
+train-seed = 42
+upload-seed = 42
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

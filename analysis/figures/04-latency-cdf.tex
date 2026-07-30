@@ -1,0 +1,73 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    xlabel={Latency (ms)},
+    ylabel={CDF},
+    xmode=log,
+    ymin=0, ymax=1,
+    % CDF lines are visually busy; bump from the global `thick` to
+    % `very thick` and use line style to encode IVF vs flat (solid =
+    % IVF, dashed = flat) so the eye picks up the structural pairing
+    % even at a glance. \plaintext is implicitly IVF in this workspace.
+    every axis plot/.append style={very thick, smooth, no marks},
+    % Up to 10-entry single-row legend overflows the report's
+    % 0.74\linewidth minipage and bleeds into the parameter sidebar;
+    % wrap to 3 cols.
+    legend columns=3,
+  ]
+    \IfFileExists{\datadir/latency-cdf-plaintext.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-plaintext.tsv};
+      \addlegendentry{\plaintext+IVF}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-sap.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-sap.tsv};
+      \addlegendentry{\sap}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-sap-ivf-nprobe.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-sap-ivf-nprobe.tsv};
+      \addlegendentry{\sap+IVF (nprobe)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-sap-ivf-beta.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-sap-ivf-beta.tsv};
+      \addlegendentry{\sap+IVF ($\beta$)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-emvp.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-emvp.tsv};
+      \addlegendentry{\emvp}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-emvp-ivf-nprobe.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-emvp-ivf-nprobe.tsv};
+      \addlegendentry{\emvp+IVF}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-bntm.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-bntm.tsv};
+      \addlegendentry{\bntm}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-bntm-ivf-nprobe.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-bntm-ivf-nprobe.tsv};
+      \addlegendentry{\bntm+IVF}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-tiptoe.tsv}{
+      \addplot+[densely dotted] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-tiptoe.tsv};
+      \addlegendentry{\tiptoe}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-tiptoe-go.tsv}{
+      \addplot+[densely dotted] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-tiptoe-go.tsv};
+      \addlegendentry{\tiptoego}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

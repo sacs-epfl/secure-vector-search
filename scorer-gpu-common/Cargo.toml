@@ -1,0 +1,30 @@
+[package]
+name = "scorer-gpu-common"
+version = "0.1.0"
+edition = "2024"
+
+# Plan 27 — shared GPU infrastructure for the streaming cluster-upload
+# pattern. This crate is at the same dep level as `ivf-index`; it is
+# itself only reached when a downstream `scorer-*` crate enables its
+# `gpu` Cargo feature. CPU-only builds never see this crate, so
+# pulling cudarc / nvml-wrapper as hard deps here is the right shape:
+# anyone touching `scorer-gpu-common` already wants CUDA on PATH.
+
+[features]
+default = []
+# `cuda` pulls cudarc + NVML and compiles the actual GPU infrastructure.
+# Without it the crate is an empty lib, so `cargo test --workspace` (which
+# builds every member) does NOT require `nvcc` on a CPU-only host — every
+# downstream scorer reaches this crate only through its own `gpu` feature,
+# which enables `cuda` (directly for emvp/bntm, via `cuvs` for plaintext).
+cuda = ["dep:cudarc", "dep:nvml-wrapper"]
+# Enable cuVS-side helpers (wrapping `cuvs::brute_force::Index` + the
+# `cuvs::Resources` lifetime under a `DeviceCluster`). Implies `cuda`.
+# cudarc-only scorers (emvp, bntm) leave `cuvs` off but still get `cuda`.
+cuvs = ["dep:cuvs", "cuda"]
+
+[dependencies]
+cudarc       = { workspace = true, optional = true }
+nvml-wrapper = { workspace = true, optional = true }
+thiserror    = { workspace = true }
+cuvs         = { workspace = true, optional = true }

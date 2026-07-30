@@ -1,0 +1,28 @@
+SAP+IVF at $\beta{=}0$ is consistently faster than plaintext+IVF at
+the $\approx\!90\%$ recall operating point on this 8.8\,M corpus
+(\texttt{nprobe=64}, $n_\text{centroids}{=}2967$):
+
+\begin{itemize}\setlength{\itemsep}{0pt}
+  \item plaintext+IVF:    mean $41.4$\,ms, p95 $47.6$\,ms, recall $0.933$
+  \item SAP+IVF (nprobe): mean $30.2$\,ms, p95 $35.9$\,ms, recall $0.928$
+  \item SAP+IVF (beta):   mean $27.4$\,ms, p95 $35.1$\,ms, recall $0.928$
+\end{itemize}
+
+\textbf{We do not have a confirmed explanation.} The result is
+counter-intuitive because the cryptographic path cannot be doing the
+work: at $\beta{=}0$ the SAP transform is $c_i = s\!\cdot\!v_i$, a
+uniform scalar that is exactly ranking-preserving. Both scorers also
+share the inner scoring kernel --- the SAP+IVF index downcasts its
+$f64$ ciphertexts to $f32$ for the per-cluster scan (see
+\path{scorer-sap/src/ivf.rs}, the ``Downcast f64 ciphertexts to f32''
+path) and then calls the same \texttt{ivf\_index::distance::l2\_f32}
+on \texttt{\&[f32]} that plaintext+IVF uses. The hot loops are
+byte-for-byte identical FLOP-wise, so the $\sim$11\,ms gap has to
+live outside the distance kernel: candidates are the routing
+(centroid scan over 2967 centroids), the top-$k$ merge path, or
+per-query glue (allocations, batch handling). The current data
+cannot distinguish among these --- one $\beta{=}0$,
+$\mathtt{nprobe=64}$ sweep with \texttt{--breakdown} would split the
+seven canonical substeps and pin the source of the gap directly;
+until then this finding flags the observation rather than explaining
+it.

@@ -1,0 +1,12 @@
+The vertical guide at $N{=}16$ is the \emph{socket boundary} on
+sacs006's dual-socket Xeon Gold 6426Y --- past this thread count
+NUMA crossing dominates and remote-memory traffic eats the
+parallel gain. The guide at $N{=}32$ is the SMT boundary: past
+that, threads share execution units with their physical sibling
+and ``parallelism'' is logical-only. Solid lines are pinned to
+socket~0 (\texttt{physcpubind=0-15,membind=0}); dashed are
+unpinned (16, 32, 64) so the reader can attribute slope changes
+to the right phenomenon. \tiptoe's flat line is the headline
+finding for the index $\times$ hardware story: BFV is
+single-threaded, so adding cores cannot rescue \tiptoe's
+throughput.

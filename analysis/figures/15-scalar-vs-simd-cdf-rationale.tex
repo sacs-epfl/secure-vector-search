@@ -1,0 +1,25 @@
+Per-query latency CDFs paired by ISA at the
+$\approx{}\mathtt{cdf\text{-}target}$ recall operating point: solid
+lines are scalar-baseline runs (\texttt{make eval}; baseline
+x86-64), dashed lines are SIMD-enabled runs (\texttt{make
+eval-native}; AVX-512 active). Each ISA pair shares the same
+$qp$ value so the comparison is apples-to-apples on the same
+workload --- the leftward shift of a dashed curve relative to
+its solid sibling is the per-query speedup attributable to
+Plan~25's compile-time SIMD gating (\texttt{cfg(target\_feature
+= "avx512f")} guards in \texttt{scorer-bntm/src/crypto.rs},
+\texttt{ivf-index/src/distance.rs}, and \texttt{scorer-sap/src/
+distance.rs}).
+
+Schemes with only one ISA partition recorded on this machine
+render as a single curve (the figure's per-curve
+\texttt{\textbackslash IfFileExists\{\}} skips absent series
+cleanly). The first useful render lands once at least one scheme
+has been re-run with both \texttt{make eval} and \texttt{make
+eval-native} on the same git-sha.
+
+The per-row \texttt{speedup\_vs\_scalar} column in the summary
+table next to this figure quantifies the per-scheme mean-latency
+ratio (= scalar mean / SIMD mean); 1.0 on every scalar row by
+construction, and the headline speedup on every SIMD row. NaN
+when no scalar partition exists for that scheme.

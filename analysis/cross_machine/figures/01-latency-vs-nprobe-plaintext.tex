@@ -1,0 +1,25 @@
+\begin{tikzpicture}
+  \begin{axis}[
+    xmode=log, log basis x=2, ymode=log,
+    xlabel={nprobe},
+    ylabel={mean latency (ms)},
+    title={\texttt{plaintext}: latency vs nprobe},
+    legend columns=3,
+  ]
+    % \foreach defines \slug and \dlabel only inside the loop body;
+    % \addlegendentry stores its argument as a token list that pgfplots
+    % renders after the axis ends, by which time \dlabel is gone. The
+    % \edef + \noexpand dance below expands \slug and \dlabel right
+    % now (per iteration) while leaving \addplot / \addlegendentry
+    % themselves unevaluated.
+    \foreach \slug/\dlabel in \canonicalSeries {%
+      \IfFileExists{\datadir/01-latency-vs-nprobe-plaintext-\slug.tsv}{%
+        \edef\xtemp{%
+          \noexpand\addplot+ table[x=nprobe, y=latency_ms]
+            {\datadir/01-latency-vs-nprobe-plaintext-\slug.tsv};%
+          \noexpand\addlegendentry{\dlabel}%
+        }\xtemp
+      }{}%
+    }
+  \end{axis}
+\end{tikzpicture}

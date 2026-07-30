@@ -1,0 +1,19 @@
+QPS is computed as $1/\text{mean latency}$, not measured throughput
+under load. This is the deployment question (``serial latency under
+no contention'') rather than a saturation curve --- multi-threaded
+throughput with batching has its own axis (figure 07, parallel
+scaling). The chart conveys exactly the same data as figure 01 with
+the x-axis flipped (higher = better); reading both figures
+side-by-side is redundant. Use this one when comparing against
+QPS-based service-level objectives.
+
+Each point carries asymmetric x-axis error bars: the short positive
+arm is the across-rep $95\%$ CI on the mean (precision of the
+measurement), and the long negative arm extends to the
+$\text{p99-throughput}$ point ($1/\text{p99-latency}$). A wide
+negative whisker says ``the mean is achievable on average but the
+tail reaches further left'' --- useful for distinguishing schemes
+whose per-query latency is consistent (short whisker) from ones
+whose tail dominates the worst-case experience (long whisker). Both
+arms use the same raw \texttt{latency-us} data; no new sweeps were
+needed.

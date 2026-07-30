@@ -1,0 +1,85 @@
+\documentclass[a4paper,11pt]{article}
+        \usepackage[T1]{fontenc}
+        \usepackage{lmodern}
+        \usepackage{graphicx}
+        \usepackage{booktabs}
+        \usepackage{geometry}
+        \usepackage[hidelinks]{hyperref}
+        \geometry{margin=2.5cm}
+
+        \title{\textbf{Evaluation Report}\\[0.4em]
+                \large Run 1777973898\quad Scheme: unknown}
+        \author{Secure Vector Search}
+        \date{Generated: 2026-05-05 09:50:03 UTC}
+
+        \begin{document}
+        \maketitle\thispagestyle{empty}
+
+        \section*{Run metadata}
+        \begin{tabular}{@{}ll@{}}
+          \toprule
+          \textbf{Field} & \textbf{Value} \\
+          \midrule
+          Run ID          & \texttt{1777973898} \\
+          Status          & complete \\
+          Git             & \texttt{unknown (unknown)} \\
+          Machine ID      & \texttt{unknown} \\
+          CPU             & unknown \\
+          Cores / RAM     & ? cores / 0.0\,GB \\
+          Scheme          & unknown \\
+          $k$             & ? \\
+          Repetitions     & ? \\
+          GPU             & none \\
+          Dataset         & \texttt{?} \\
+          Eval started    & unknown \\
+          Eval finished   & unknown \\
+          Eval duration   & unknown \\
+          Report built    & 2026-05-05 09:50:03 UTC \\
+          \bottomrule
+        \end{tabular}
+
+        \newpage
+        \section{Quality}
+
+        \begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/e9eb213181dc244d70e9b0e63a0cbb4f941f239b/1777973898/plots/figures/05-beta-recall.pdf}
+  \caption{SAP recall@$k$ vs.\ perturbation level $\beta$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/e9eb213181dc244d70e9b0e63a0cbb4f941f239b/1777973898/plots/figures/06-beta-recall-sap-ivf.pdf}
+  \caption{SAP+IVF recall@$k$ vs.\ perturbation level $\beta$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/e9eb213181dc244d70e9b0e63a0cbb4f941f239b/1777973898/plots/figures/03-communication.pdf}
+  \caption{Communication volume per query (query + response bytes).}
+\end{figure}
+
+
+        \newpage
+        \section{Performance}
+
+        \begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/e9eb213181dc244d70e9b0e63a0cbb4f941f239b/1777973898/plots/figures/01-recall-latency.pdf}
+  \caption{Recall@$k$ vs.\ mean latency (log scale).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/e9eb213181dc244d70e9b0e63a0cbb4f941f239b/1777973898/plots/figures/02-recall-throughput.pdf}
+  \caption{Recall@$k$ vs.\ throughput (log scale).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/e9eb213181dc244d70e9b0e63a0cbb4f941f239b/1777973898/plots/figures/04-latency-cdf.pdf}
+  \caption{Latency CDF at the $\approx$90\% recall operating point.}
+\end{figure}
+
+
+        \end{document}

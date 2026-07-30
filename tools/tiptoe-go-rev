@@ -1,0 +1,15 @@
+# Pinned commit SHAs for the Tiptoe Go reference, used by Phase 0 of
+# Plan 11 (`docs/plans/11-tiptoe.md`) and by the validation gate in
+# ADR 005. Update only when intentionally bumping references.
+#
+# Format: one `<repo> <commit>` pair per line.
+#
+# Our additions (paired-runner binary + clustered-CSV corpus reader +
+# go.mod timestamp fix) are vendored as a patch:
+#     tools/tiptoe-go.patch
+# applied on top of the ahenzinger/tiptoe pin below at runner-build time
+# by eval-harness/bin/tiptoe_go_runner.rs.
+
+ahenzinger/tiptoe     ba7cae43ab8686328897aabd3b7f861622d8ac8a
+ahenzinger/underhood  f053a81c63855e452fe0129302a6644b2d46d3ed
+henrycg/simplepir     026ee7bd6783f9d3b8f6fa33abdafe2b30a21e87

@@ -1,0 +1,86 @@
+[workspace]
+members = [
+    "scorer-core",
+    "ivf-index",
+    "scorer-gpu-common",
+    "scorer-plaintext",
+    "scorer-sap",
+    "scorer-emvp",
+    "scorer-tiptoe",
+    "scorer-bntm",
+    "eval-harness",
+]
+resolver = "2"
+
+[workspace.dependencies]
+async-trait = "0.1"
+thiserror = "2"
+tokio = { version = "1", features = ["rt", "macros"] }
+rand        = "0.10"
+rand_chacha = "0.10"
+rand_distr  = "0.6"
+rayon       = "1"
+clap        = { version = "4", features = ["derive", "env"] }
+anyhow      = "1"
+indicatif   = "0.17"
+sysinfo     = "0.33"
+# Plan 24 W4 phase 3/4: lazy-load encrypted-cluster matrices from the
+# on-disk cache via mmap so the in-memory handle doesn't have to hold
+# the full corpus-sized encrypted payload (91 GB for EMVP-IVF and
+# ~106 GB for BN-IVF at 8.8M MS MARCO — exceeds sacs006's 125 GB
+# physical RAM). Used by scorer-emvp/ivf and scorer-bntm/ivf.
+memmap2     = "0.9"
+# Plan 25 step 2 — portable SIMD abstraction for Family B (L2 sum-of-
+# squares kernels in `ivf-index` and `scorer-sap`). Stable, no nightly,
+# no proc-macro, no FFI; picks the widest available SIMD at build time
+# (NEON / AVX2 / AVX-512). Pinned (`=`) so figure-13 BN / SAP timings
+# stay reproducible across hosts. Family A (BN/EMVP Mersenne matvec)
+# does NOT use `wide` — it lifts the validated `core::arch::x86_64`
+# AVX-512 impl from `scorer-bntm/examples/mersenne_matvec_simd_bench.rs`
+# directly (Path B per the implementation decision; the bench's impl
+# is already bit-equality-validated, no point re-implementing in `wide`).
+wide        = "=1.4.0"
+serde       = { version = "1", features = ["derive"] }
+# fhe.rs (Tristan Lepoint) — adopted for the §6.2 BFV layer per Plan 11
+# step 1c (BFV survey resolved 2026-05-05; OQ-2 closed).
+# Adoption is contingent on `scorer-tiptoe::bfv::seal_compat` confirming
+# parameter parity with the Go reference's SEAL 4.1.1 defaults.
+fhe         = "0.1"
+fhe-traits  = "0.1"
+
+scorer-core = { path = "scorer-core" }
+ivf-index   = { path = "ivf-index" }
+# Plan 27 — streaming GPU cluster upload. Shared infra used by every
+# `scorer-*` crate's `gpu` module (cuVS + cudarc backends). The crate
+# is at the same dep level as `ivf-index`; it is itself only pulled
+# when a downstream `scorer-*` crate enables its `gpu` feature, so
+# CPU-only builds never see cudarc or NVML.
+scorer-gpu-common = { path = "scorer-gpu-common" }
+
+# Plan 17 step 1 — RAPIDS cuVS Rust binding for the plaintext-GPU and
+# SAP-GPU paths. Optional everywhere it's used (gated behind a per-crate
+# `gpu` Cargo feature); the CPU-only build never pulls cuvs / cuvs-sys.
+# `ndarray` is cuvs's required input type at the API boundary.
+cuvs        = { version = "=26.4.0", default-features = false }
+ndarray     = "0.15"
+
+# Plan 17 step 3 — low-level CUDA bindings (memory + launch + PTX load)
+# for the EMVP / BN custom kernels. Enabled only behind each crate's
+# `gpu` feature; CPU-only builds never pull cudarc. We pick the
+# minimum subset: `driver` (cuMemAlloc / cuModuleLoad / cuLaunchKernel),
+# `std`, `cuda-version-from-build-system` (lets cudarc match the
+# system CUDA toolkit version we already export via
+# /usr/local/cuda-12.4 in the rapids-env recipe), and
+# `fallback-dynamic-loading` (cudarc dlopens libcuda.so at runtime
+# rather than link-time, matching how cuvs-sys finds libcuvs via
+# CMAKE_PREFIX_PATH). No cublas / curand / nvrtc — the EMVP kernel
+# is precompiled to PTX by build.rs.
+cudarc      = { version = "0.19", default-features = false, features = ["cuda-version-from-build-system", "driver", "nvrtc", "std", "fallback-dynamic-loading"] }
+
+# Plan 27 — NVML for peak-VRAM sampling + budget resolution in
+# `scorer-gpu-common`. Loaded via `fallback-dynamic-loading`-style
+# `init()` so the absence of NVML on a non-NVIDIA host surfaces as a
+# clean `Err` rather than a link-time failure; CPU-only builds never
+# pull nvml because `scorer-gpu-common` itself is only reached through
+# a `scorer-*` crate's `gpu` feature.
+nvml-wrapper = "0.10"

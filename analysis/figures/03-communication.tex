@@ -1,0 +1,153 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % --------------------------------------------------------------------
+  % Three-panel grouped bar chart, vertical bars, shared y-scale.
+  % Schemes are partitioned by communication shape:
+  %
+  %   Panel 1 (left):   online-only      -- plaintext, sap, sap-ivf
+  %     2 bars: query, response.
+  %   Panel 2 (middle): with-setup       -- bntm{,-ivf}, emvp{,-ivf}
+  %     3 bars: query, response, setup.
+  %   Panel 3 (right):  with-offline     -- tiptoe, tiptoe-go
+  %     5 bars: query, response, setup, offline-up, offline-down.
+  %
+  % The y-axis (bytes, log scale) is shared across panels via explicit
+  % ymin/ymax so bar heights are directly comparable across panels --
+  % a setup bar in panel 2 and an offline-up bar in panel 3 line up
+  % against the same gridlines.
+  %
+  % preprocess.py emits one TSV per class. `\IfFileExists` per panel
+  % keeps the figure rendering cleanly when a class has no data on
+  % this machine (e.g. laptops without \tiptoe data).
+  %
+  % The shared legend is built from `\addlegendimage` entries inside
+  % panel 1 (matching the Paired cycle slots A-E that the actual bars
+  % use) and placed via `legend to name=commlegend` + a `\ref`-d node
+  % above the groupplot. The legend lists all five categories even
+  % when a panel doesn't render some of them.
+  % --------------------------------------------------------------------
+  \pgfplotsset{
+    /pgfplots/comm-bars/.style={
+      bar cycle list/.style={cycle list/Paired-12},
+      ybar,
+      every axis plot/.append style={fill, fill opacity=0.85},
+      ymode=log,
+      log origin=infty,
+      ymin=1, ymax=2e9,
+      % Human-readable IEC byte labels. Tick positions are at the
+      % EXACT binary values (KiB = 2^10, MiB = 2^20, GiB = 2^30) so
+      % the labels are arithmetically honest, not 10^k approximations.
+      % `100 B` sits at 10^2 (B is decimal). Six ticks to fill the
+      % 1 B → 1 KiB gap that the every-2-decades layout left bare.
+      ytick={10,2^10,100*2^10,10*2^20,2^30},
+      yticklabels={10\,B, 1\,KiB, 100\,KiB, 10\,MiB, 1\,GiB},
+      bar width=4pt,
+      xtick=data,
+      height=2in,
+      ylabel={Bytes (log scale)},
+      ylabel style={font=\sffamily\footnotesize},
+      x tick label style={
+        rotate=35, anchor=north east, font=\sffamily\footnotesize,
+      },
+      y tick label style={font=\sffamily\footnotesize},
+      title style={font=\sffamily\footnotesize, yshift=-2pt},
+    },
+  }
+
+  % preprocess.py guarantees these TSVs exist (emitting a single
+  % `(none)` placeholder row when no schemes match the class), so the
+  % reads can be unconditional. `xticklabels from table=` is evaluated
+  % at axis-option time and needs the macro defined globally before
+  % the groupplot opens.
+  \pgfplotstableread[col sep=tab]{\datadir/communication-online-only.tsv}\commOnlineOnly
+  \pgfplotstableread[col sep=tab]{\datadir/communication-with-setup.tsv}\commWithSetup
+  \pgfplotstableread[col sep=tab]{\datadir/communication-with-offline.tsv}\commWithOffline
+
+  \begin{groupplot}[
+    group style={
+      group size=3 by 1,
+      horizontal sep=0.7cm,
+      y descriptions at=edge left,   % single shared y-axis label / ticks
+    },
+    comm-bars,
+  ]
+
+  % --------------------------------------------------------------------
+  % Panel 1 (left) - online-only: 2 bars per scheme. Hosts the shared
+  % legend; manual `\addlegendimage` entries match Paired cycle slots
+  % A-E so the legend lists all five categories regardless of which
+  % panel actually renders which bar.
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    title={online-only},
+    xticklabels from table={\commOnlineOnly}{scheme},
+    width=0.3\linewidth,    % fewer bars -> narrower panel
+    legend to name=commlegend,
+    legend columns=5,
+    legend style={
+      draw=none, fill=white, font=\sffamily\footnotesize,
+      /tikz/every even column/.append style={column sep=3pt},
+    },
+    enlarge x limits=0.4,
+  ]
+    \addlegendimage{ybar legend, fill=Paired-A, fill opacity=0.85, draw=Paired-A}
+    \addlegendentry{Query ($\uparrow$)}
+    \addlegendimage{ybar legend, fill=Paired-B, fill opacity=0.85, draw=Paired-B}
+    \addlegendentry{Response ($\downarrow$, /cluster)}
+    \addlegendimage{ybar legend, fill=Paired-C, fill opacity=0.85, draw=Paired-C}
+    \addlegendentry{Setup (one-time)}
+    \addlegendimage{ybar legend, fill=Paired-D, fill opacity=0.85, draw=Paired-D}
+    \addlegendentry{Offline $\uparrow$}
+    \addlegendimage{ybar legend, fill=Paired-E, fill opacity=0.85, draw=Paired-E}
+    \addlegendentry{Offline $\downarrow$}
+
+    \IfFileExists{\datadir/communication-online-only.tsv}{%
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=query_bytes]            {\commOnlineOnly};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=cluster_response_bytes] {\commOnlineOnly};
+    }{\node {no data};}
+
+  % --------------------------------------------------------------------
+  % Panel 2 (middle) - with-setup: 3 bars per scheme.
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    title={with one-time setup},
+    xticklabels from table={\commWithSetup}{scheme},
+    width=0.45\linewidth,
+    enlarge x limits=0.34,
+  ]
+    \IfFileExists{\datadir/communication-with-setup.tsv}{%
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=query_bytes]            {\commWithSetup};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=cluster_response_bytes] {\commWithSetup};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=setup_bytes]            {\commWithSetup};
+    }{\node {no data};}
+
+  % --------------------------------------------------------------------
+  % Panel 3 (right) - with-offline: 5 bars per scheme.
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    title={with per-query offline},
+    xticklabels from table={\commWithOffline}{scheme},
+    width=0.42\linewidth,    % most bars per scheme -> widest panel
+    enlarge x limits=0.5,
+  ]
+    \IfFileExists{\datadir/communication-with-offline.tsv}{%
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=query_bytes]                  {\commWithOffline};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=cluster_response_bytes]       {\commWithOffline};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=setup_bytes]                  {\commWithOffline};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=pre_query_offline_up_bytes]   {\commWithOffline};
+      \addplot+ table[col sep=tab, x expr=\coordindex, y=pre_query_offline_down_bytes] {\commWithOffline};
+    }{\node {no data};}
+
+  \end{groupplot}
+
+  % Shared legend, centred above the middle panel. `\ref{commlegend}`
+  % needs a second compile pass to resolve; latexmk handles that.
+  % yshift bumped well above the per-panel `title={…}` text — the
+  % old 4pt landed the legend strip on top of the title.
+  \node[anchor=south, inner sep=0pt, yshift=18pt]
+    at (group c2r1.north) {\ref{commlegend}};
+\end{tikzpicture}
+\end{document}

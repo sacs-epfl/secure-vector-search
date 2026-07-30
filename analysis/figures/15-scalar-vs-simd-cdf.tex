@@ -1,0 +1,65 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    xlabel={Latency (ms)},
+    ylabel={CDF},
+    xmode=log,
+    ymin=0, ymax=1,
+    % Plan 26 figure 15 — scalar vs SIMD latency CDFs per scheme at
+    % the same operating point. Encode the ISA partition via line
+    % style: solid = scalar baseline, dashed = SIMD-enabled (`make
+    % eval-native`, AVX-512 path active). Scheme is encoded via
+    % colour from the Set1 palette in style.tex; the eye reads
+    % "same scheme, scalar→SIMD" as a same-colour solid→dashed pair.
+    every axis plot/.append style={very thick, smooth, no marks},
+    % Up to 4 schemes × 2 ISAs = 8 legend entries; wrap to 2 cols so
+    % the 0.74\linewidth minipage doesn't bleed into the parameter
+    % sidebar.
+    legend columns=2,
+  ]
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-plaintext-scalar.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-plaintext-scalar.tsv};
+      \addlegendentry{\plaintext (scalar)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-plaintext-simd.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-plaintext-simd.tsv};
+      \addlegendentry{\plaintext (SIMD)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-sap-ivf-nprobe-scalar.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-sap-ivf-nprobe-scalar.tsv};
+      \addlegendentry{\sap+IVF (scalar)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-sap-ivf-nprobe-simd.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-sap-ivf-nprobe-simd.tsv};
+      \addlegendentry{\sap+IVF (SIMD)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-emvp-ivf-scalar.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-emvp-ivf-scalar.tsv};
+      \addlegendentry{\emvp+IVF (scalar)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-emvp-ivf-simd.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-emvp-ivf-simd.tsv};
+      \addlegendentry{\emvp+IVF (SIMD)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-bntm-ivf-scalar.tsv}{
+      \addplot+[solid] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-bntm-ivf-scalar.tsv};
+      \addlegendentry{\bntm+IVF (scalar)}
+    }{}
+    \IfFileExists{\datadir/latency-cdf-scalar-vs-simd-bntm-ivf-simd.tsv}{
+      \addplot+[dashed] table[col sep=tab, x=latency_ms, y=cdf]
+        {\datadir/latency-cdf-scalar-vs-simd-bntm-ivf-simd.tsv};
+      \addlegendentry{\bntm+IVF (SIMD)}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

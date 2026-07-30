@@ -1,0 +1,31 @@
+[package]
+name = "scorer-bntm"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[features]
+default = []
+# Plan 17 step 4 — pulls cudarc and triggers the build.rs nvcc → PTX
+# step for the BN-specific Mersenne full-GEMV kernel. CPU-only builds
+# (default) skip both: cudarc is optional, build.rs short-circuits
+# when CARGO_FEATURE_GPU is unset. Mirrors scorer-emvp's gpu feature.
+# Plan 27 PR 5: also pulls `scorer-gpu-common` for the streaming
+# ClusterStore + NVML peak sampler.
+gpu = ["dep:cudarc", "dep:scorer-gpu-common", "scorer-gpu-common/cuda"]
+
+[dependencies]
+scorer-core  = { workspace = true }
+ivf-index    = { workspace = true }
+async-trait  = { workspace = true }
+thiserror    = { workspace = true }
+tokio        = { workspace = true }
+rand         = { workspace = true }
+rand_chacha  = { workspace = true }
+rayon        = { workspace = true }
+memmap2      = { workspace = true }
+cudarc       = { workspace = true, optional = true }
+scorer-gpu-common = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile = "3"

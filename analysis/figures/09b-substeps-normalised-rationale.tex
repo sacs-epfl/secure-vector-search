@@ -1,0 +1,94 @@
+Normalising to 100\,\% removes the absolute-scale axis so the
+\emph{shape} of per-query cost is directly comparable across
+schemes that differ by orders of magnitude. A scheme dominated
+by \textsf{server-compute} is parallelism-friendly (cross-reference
+figure 07's parallel scaling); a scheme with a fat
+\textsf{decompress} or \textsf{decode} segment has its tax on the
+client side, where threading helps less.
+
+\smallskip
+\IfFileExists{\datadir/substep-breakdown-absolute-ms.tsv}{%
+  \begin{center}
+  \footnotesize Per-query mean (ms), sorted by total ascending top-to-bottom.\par
+  \pgfplotstabletypeset[
+    col sep=tab,
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+    columns={scheme, total, route, encode, server_compute, verify, decompress, decode, merge},
+    columns/scheme/.style={string type, column name=Scheme},
+    columns/total/.style={
+      column name=Total, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/route/.style={
+      column name=route, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/encode/.style={
+      column name=encode, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/server_compute/.style={
+      column name={srv-comp}, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/verify/.style={
+      column name=verify, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/decompress/.style={
+      column name=decomp., column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/decode/.style={
+      column name=decode, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/merge/.style={
+      column name=merge, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+  ]{\datadir/substep-breakdown-absolute-ms.tsv}
+  \end{center}
+}{}
+
+\IfFileExists{\datadir/substep-breakdown-normalised-pct.tsv}{%
+  \begin{center}
+  \footnotesize Share of per-query time (\%) --- same row order.\par
+  \pgfplotstabletypeset[
+    col sep=tab,
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+    columns={scheme, route, encode, server_compute, verify, decompress, decode, merge},
+    columns/scheme/.style={string type, column name=Scheme},
+    columns/route/.style={
+      column name=route, column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+    columns/encode/.style={
+      column name=encode, column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+    columns/server_compute/.style={
+      column name={srv-comp}, column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+    columns/verify/.style={
+      column name=verify, column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+    columns/decompress/.style={
+      column name=decomp., column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+    columns/decode/.style={
+      column name=decode, column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+    columns/merge/.style={
+      column name=merge, column type=r,
+      fixed, fixed zerofill, precision=1,
+    },
+  ]{\datadir/substep-breakdown-normalised-pct.tsv}
+  \end{center}
+}{}

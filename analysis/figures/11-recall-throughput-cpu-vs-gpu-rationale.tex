@@ -1,0 +1,18 @@
+CPU and GPU substrates overlaid for each scheme. Reads as
+``where does GPU acceleration shift the Pareto frontier'' rather
+than ``which scheme is fastest''. Solid lines are measured CPU;
+dashed lines are measured GPU; the dotted \tiptoe line is the
+analytical bandwidth proxy projection --- \tiptoe is reported via
+\texttt{effective\_bytes\_per\_query} only because a custom
+LWE-int64 GEMV kernel would only confirm what the proxy already
+shows. A scheme appears with both substrates when both ran on
+the same machine; \texttt{\textbackslash IfFileExists} hides the
+half-figure cleanly when only one substrate is available.
+Per-query host-to-device and device-to-host transfer dominates
+GPU latency at the SEC128 / 100k MS~MARCO operating point --- the
+GPU lines may sit \emph{above} the CPU lines at small
+\texttt{nprobe}, which is the honest reading of the
+launch-overhead caveat: each probed cluster issues its own kernel
+launch plus query upload and partial-result download, and at
+microsecond-scale per-cluster compute the transfer stack
+dominates the total.

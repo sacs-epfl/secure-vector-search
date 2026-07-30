@@ -1,0 +1,9 @@
+The seven canonical substeps (\textsf{route, encode,
+server-compute, verify, decompress, decode, merge}) are a fixed
+taxonomy across schemes --- substeps that don't apply to a given
+scheme write 0 (e.g.\ flat scorers have no \textsf{route} or
+\textsf{merge}; non-\tiptoe schemes have no \textsf{decompress}).
+Read the absolute scale here for ``how much time per query'' and
+cross-reference figure~09b for ``how the time is split''. \bntm's
+\textsf{verify} segment is non-zero only when \texttt{verify=on};
+its share is the headline subject of figure 12.

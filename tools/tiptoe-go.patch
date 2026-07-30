@@ -1,0 +1,587 @@
+# Tiptoe Go reference — Secure Vector Search additions
+#
+# Apply against the upstream commit pinned in tools/tiptoe-go-rev:
+#     git clone https://github.com/ahenzinger/tiptoe.git
+#     cd tiptoe && git checkout ba7cae43ab8686328897aabd3b7f861622d8ac8a
+#     git apply path/to/tools/tiptoe-go.patch
+#     go mod download && go build ./cmd/paired-runner/
+#
+# Hunks:
+#   - go.mod / go.sum            : timestamp fix on the underhood pseudo-version
+#                                   so `go mod download` succeeds on Go 1.21+
+#                                   (the upstream timestamp predates the actual
+#                                   VCS commit time and is rejected by the
+#                                   strict pseudo-version check).
+#   - search/corpus/             : ReadEmbeddingsClusteredCsv — additive reader
+#     read_clustered.go            for an externally-clustered embeddings CSV
+#                                   (the IVF assignment is computed by the Rust
+#                                   scorer-tiptoe port and passed in).
+#   - cmd/paired-runner/         : standalone Go binary that drives the
+#     main.go                      in-process server+client over the supplied
+#                                   IVF clustering, emitting per-query top-k
+#                                   hits + offline/online timing + byte counts.
+#                                   Driven by eval-harness/bin/tiptoe_go_runner.rs
+#                                   for the validation gate (Plan 11 Phase 1 §3).
+#   - cmd/paired-runner/         : smoke-test helpers (synthetic clustered
+#     gen_smoke.py, check_smoke.py  corpus generation + plaintext-IP score check).
+#                                   Not used in production paths; documentation.
+#
+diff --git a/cmd/paired-runner/check_smoke.py b/cmd/paired-runner/check_smoke.py
+new file mode 100644
+index 0000000..eaa5e8e
+--- /dev/null
++++ b/cmd/paired-runner/check_smoke.py
+@@ -0,0 +1,88 @@
++"""Verify paired-runner output against plaintext inner products.
++
++Reads the same emb.csv and queries.csv used to drive the runner, computes the
++ground-truth top-k from int8 inner products within each query's cluster, and
++checks that the runner's score is exactly equal (no LWE-noise tolerance: the
++crypto answer should be bit-identical to plaintext if parameters fit)."""
++import argparse
++import csv
++import sys
++
++
++def load_emb(path):
++    with open(path) as f:
++        r = csv.reader(f)
++        num_docs = int(next(r)[0])
++        slots = int(next(r)[0])
++        slot_bits = int(next(r)[0])
++        num_clusters = int(next(r)[0])
++        clusters = {c: [] for c in range(num_clusters)}
++        for row in r:
++            cid = int(row[0])
++            emb = [int(x) for x in row[1:]]
++            assert len(emb) == slots
++            clusters[cid].append(emb)
++        return clusters, slots, num_clusters
++
++
++def load_queries(path):
++    out = []
++    with open(path) as f:
++        r = csv.reader(f)
++        for row in r:
++            qid = int(row[0])
++            cid = int(row[1])
++            emb = [int(x) for x in row[2:]]
++            out.append((qid, cid, emb))
++    return out
++
++
++def load_out(path):
++    by_q = {}
++    with open(path) as f:
++        r = csv.reader(f)
++        next(r)  # header
++        for row in r:
++            qid, rank, idx, score = map(int, row)
++            by_q.setdefault(qid, []).append((rank, idx, score))
++    for qid in by_q:
++        by_q[qid].sort()
++    return by_q
++
++
++def inner(a, b):
++    return sum(x * y for x, y in zip(a, b))
++
++
++def main():
++    p = argparse.ArgumentParser()
++    p.add_argument("--out-dir", required=True)
++    args = p.parse_args()
++
++    clusters, _slots, _nc = load_emb(f"{args.out_dir}/emb.csv")
++    queries = load_queries(f"{args.out_dir}/queries.csv")
++    runner = load_out(f"{args.out_dir}/out.csv")
++
++    fail = 0
++    for qid, cid, qemb in queries:
++        true_scores = [(i, inner(d, qemb)) for i, d in enumerate(clusters[cid])]
++        true_scores.sort(key=lambda t: -t[1])
++
++        runner_hits = runner[qid]
++        for rank, (true_idx, true_score) in enumerate(true_scores[:len(runner_hits)]):
++            r_rank, r_idx, r_score = runner_hits[rank]
++            if (rank, true_idx, true_score) != (r_rank, r_idx, r_score):
++                print(f"MISMATCH qid={qid} rank={rank}: "
++                      f"plaintext=({true_idx},{true_score}) runner=({r_idx},{r_score})")
++                fail += 1
++        if fail == 0:
++            print(f"qid={qid} cluster={cid} top-1=doc{runner_hits[0][1]} score={runner_hits[0][2]} OK")
++
++    if fail:
++        print(f"\n{fail} mismatches", file=sys.stderr)
++        sys.exit(1)
++    print("\nALL OK — runner scores match plaintext inner products bit-for-bit")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/cmd/paired-runner/gen_smoke.py b/cmd/paired-runner/gen_smoke.py
+new file mode 100644
+index 0000000..b046fbc
+--- /dev/null
++++ b/cmd/paired-runner/gen_smoke.py
+@@ -0,0 +1,69 @@
++"""Generate a tiny clustered embeddings CSV + queries CSV for paired-runner smoke testing.
++
++Format must match search/corpus/read_clustered.go and the queries reader in main.go.
++"""
++import argparse
++import csv
++import math
++import os
++import random
++
++
++def write_emb(path: str, *, num_clusters: int, docs_per_cluster: int,
++              slots: int, slot_bits: int, seed: int) -> None:
++    rng = random.Random(seed)
++    lo = -(1 << (slot_bits - 1))
++    hi = (1 << (slot_bits - 1))
++    num_docs = num_clusters * docs_per_cluster
++
++    with open(path, "w", newline="") as f:
++        w = csv.writer(f)
++        w.writerow([str(num_docs)])
++        w.writerow([str(slots)])
++        w.writerow([str(slot_bits)])
++        w.writerow([str(num_clusters)])
++        for cid in range(num_clusters):
++            for _ in range(docs_per_cluster):
++                row = [str(cid)] + [str(rng.randint(lo, hi)) for _ in range(slots)]
++                w.writerow(row)
++
++
++def write_queries(path: str, *, num_queries: int, num_clusters: int,
++                  slots: int, slot_bits: int, seed: int) -> None:
++    rng = random.Random(seed + 1)
++    lo = -(1 << (slot_bits - 1))
++    hi = (1 << (slot_bits - 1))
++    with open(path, "w", newline="") as f:
++        w = csv.writer(f)
++        for qid in range(num_queries):
++            cid = qid % num_clusters
++            row = [str(qid), str(cid)] + [str(rng.randint(lo, hi)) for _ in range(slots)]
++            w.writerow(row)
++
++
++def main():
++    p = argparse.ArgumentParser()
++    p.add_argument("--out-dir", required=True)
++    p.add_argument("--num-clusters", type=int, default=4)
++    p.add_argument("--docs-per-cluster", type=int, default=64)
++    p.add_argument("--slots", type=int, default=192)
++    p.add_argument("--slot-bits", type=int, default=5)
++    p.add_argument("--num-queries", type=int, default=4)
++    p.add_argument("--seed", type=int, default=42)
++    args = p.parse_args()
++
++    os.makedirs(args.out_dir, exist_ok=True)
++    emb = os.path.join(args.out_dir, "emb.csv")
++    qrs = os.path.join(args.out_dir, "queries.csv")
++    write_emb(emb, num_clusters=args.num_clusters,
++              docs_per_cluster=args.docs_per_cluster,
++              slots=args.slots, slot_bits=args.slot_bits, seed=args.seed)
++    write_queries(qrs, num_queries=args.num_queries,
++                  num_clusters=args.num_clusters,
++                  slots=args.slots, slot_bits=args.slot_bits, seed=args.seed)
++    print(f"emb:     {emb}")
++    print(f"queries: {qrs}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/cmd/paired-runner/main.go b/cmd/paired-runner/main.go
+new file mode 100644
+index 0000000..8d3cdf3
+--- /dev/null
++++ b/cmd/paired-runner/main.go
+@@ -0,0 +1,229 @@
++// Command paired-runner drives the in-process Tiptoe Go reference
++// (server + client, no TCP) over an externally-provided IVF clustering
++// of int8-quantised embeddings, emitting per-query top-k hits and
++// timing/byte counters as CSVs. It is the Go side of the validation
++// gate described in docs/plans/11-tiptoe.md § Validation gate.
++//
++// Driver: eval-harness/bin/tiptoe_go_runner.rs.
++package main
++
++import (
++  "encoding/csv"
++  "flag"
++  "fmt"
++  "io"
++  "os"
++  "sort"
++  "strconv"
++  "time"
++)
++
++import (
++  "github.com/henrycg/simplepir/matrix"
++  "github.com/henrycg/simplepir/pir"
++  "github.com/ahenzinger/underhood/underhood"
++)
++
++import (
++  "github.com/ahenzinger/tiptoe/search/config"
++  "github.com/ahenzinger/tiptoe/search/corpus"
++  "github.com/ahenzinger/tiptoe/search/protocol"
++  "github.com/ahenzinger/tiptoe/search/utils"
++)
++
++// In-process underhood server pair. Lifted verbatim from
++// search/protocol/embeddings_test.go; this is the standard pattern for
++// driving the offline phase without a coordinator.
++type testServer struct {
++  emb *underhood.Server[matrix.Elem64]
++}
++
++func setupTestServer(h *protocol.TiptoeHint) *testServer {
++  out := new(testServer)
++  if !h.EmbeddingsHint.IsEmpty() {
++    out.emb = underhood.NewServerHintOnly(&h.EmbeddingsHint.Hint)
++  }
++  return out
++}
++
++func applyHint(s *testServer, hq *underhood.HintQuery) *protocol.UnderhoodAnswer {
++  out := new(protocol.UnderhoodAnswer)
++  if s.emb != nil {
++    out.EmbAnswer = *s.emb.HintAnswer(hq)
++  }
++  return out
++}
++
++type query struct {
++  id        uint64
++  clusterID uint64
++  emb       []int8
++}
++
++func readQueriesCsv(path string, dim, slotBits uint64) []query {
++  f, err := os.Open(path)
++  if err != nil {
++    panic(err)
++  }
++  defer f.Close()
++
++  r := csv.NewReader(f)
++  var qs []query
++  for {
++    row, err := r.Read()
++    if err == io.EOF {
++      break
++    } else if err != nil {
++      panic(err)
++    }
++    if uint64(len(row)) != 2+dim {
++      panic(fmt.Sprintf("queries CSV row: expected %d columns, got %d", 2+dim, len(row)))
++    }
++
++    qid, err := strconv.ParseUint(row[0], 10, 64)
++    if err != nil {
++      panic("Error parsing query_id: " + err.Error())
++    }
++    cid, err := strconv.ParseUint(row[1], 10, 64)
++    if err != nil {
++      panic("Error parsing cluster_id: " + err.Error())
++    }
++
++    emb := make([]int8, dim)
++    for i := uint64(0); i < dim; i++ {
++      v, err := strconv.Atoi(row[2+i])
++      if err != nil {
++        panic("Error parsing query slot: " + err.Error())
++      }
++      emb[i] = clamp(v, slotBits)
++    }
++    qs = append(qs, query{id: qid, clusterID: cid, emb: emb})
++  }
++  return qs
++}
++
++// clamp mirrors embeddings.Clamp without depending on the embeddings
++// package (which pulls in a python-process helper at import time).
++func clamp(v int, slotBits uint64) int8 {
++  min := -int(1 << (slotBits - 1))
++  max := int(1 << (slotBits - 1))
++  if v <= min {
++    return int8(min)
++  }
++  if v > max {
++    return int8(max)
++  }
++  return int8(v)
++}
++
++// smoothResult un-mods a score from Z_p back to a signed int by
++// interpreting the upper half [p/2, p) as negative — matches
++// embeddings.SmoothResult.
++func smoothResult(v, p uint64) int64 {
++  if v > p/2 {
++    return int64(v) - int64(p)
++  }
++  return int64(v)
++}
++
++// argsortDesc returns indices that would sort scores descending in
++// signed (smoothed) order.
++func argsortDesc(scores []uint64, p uint64) []int {
++  idx := make([]int, len(scores))
++  for i := range idx {
++    idx[i] = i
++  }
++  sort.SliceStable(idx, func(a, b int) bool {
++    return smoothResult(scores[idx[a]], p) > smoothResult(scores[idx[b]], p)
++  })
++  return idx
++}
++
++func main() {
++  embCsv := flag.String("emb-csv", "", "clustered embeddings CSV (input)")
++  queriesCsv := flag.String("queries-csv", "", "queries CSV (input)")
++  k := flag.Int("k", 10, "top-k")
++  hintMB := flag.Uint64("hint-mb", 25, "SimplePIR hint size in MB")
++  outCsv := flag.String("out-csv", "", "per-query top-k output CSV")
++  timingCsv := flag.String("timing-csv", "", "per-query timing/bytes output CSV")
++  flag.Parse()
++  if *embCsv == "" || *queriesCsv == "" || *outCsv == "" || *timingCsv == "" {
++    flag.Usage()
++    os.Exit(2)
++  }
++
++  conf := config.MakeConfig("/tmp/", false /* image_search */)
++
++  fmt.Fprintf(os.Stderr, "Loading clustered embeddings from %s\n", *embCsv)
++  corp := corpus.ReadEmbeddingsClusteredCsv(*embCsv)
++  fmt.Fprintf(os.Stderr, "  %d docs, %d slots, %d-bit, %d clusters\n",
++    corp.GetNumDocs(), corp.GetEmbeddingSlots(), corp.GetSlotBits(), corp.NumClusters())
++
++  s := new(protocol.Server)
++  fmt.Fprintf(os.Stderr, "Server preprocess (hint=%dMB)\n", *hintMB)
++  s.PreprocessEmbeddingsFromCorpus(corp, *hintMB, conf)
++
++  var h protocol.TiptoeHint
++  s.GetHint(true, &h)
++  p := h.EmbeddingsHint.Info.P()
++
++  c := protocol.NewClient(false /* no coordinator */)
++  c.Setup(&h)
++  tserv := setupTestServer(&h)
++
++  qs := readQueriesCsv(*queriesCsv, corp.GetEmbeddingSlots(), corp.GetSlotBits())
++  fmt.Fprintf(os.Stderr, "Running %d queries (k=%d)\n", len(qs), *k)
++
++  outF, err := os.Create(*outCsv)
++  if err != nil {
++    panic(err)
++  }
++  defer outF.Close()
++  fmt.Fprintln(outF, "query_id,rank,doc_local_idx,score")
++
++  timF, err := os.Create(*timingCsv)
++  if err != nil {
++    panic(err)
++  }
++  defer timF.Close()
++  fmt.Fprintln(timF, "query_id,offline_us,online_us,offline_up_bytes,offline_down_bytes,online_up_bytes,online_down_bytes")
++
++  for _, q := range qs {
++    // Offline phase: client preprocess + server hint apply.
++    offStart := time.Now()
++    ct := c.PreprocessQuery()
++    uAns := applyHint(tserv, ct)
++    c.ProcessHintApply(uAns)
++    offlineUs := time.Since(offStart).Microseconds()
++    offlineUpB := utils.MessageSizeBytes(*ct)
++    // UnderhoodAnswer is not in utils.MessageSizeBytes' type switch;
++    // size the embeddings sub-message directly (we never set UrlAnswer).
++    offlineDnB := utils.MessageSizeBytes(uAns.EmbAnswer)
++
++    // Online phase: build query, server answer, reconstruct cluster scores.
++    onStart := time.Now()
++    qry := c.QueryEmbeddings(q.emb, q.clusterID)
++    var ans pir.Answer[matrix.Elem64]
++    s.GetEmbeddingsAnswer(qry, &ans)
++    scores := c.ReconstructEmbeddingsWithinCluster(&ans, q.clusterID)
++    onlineUs := time.Since(onStart).Microseconds()
++    onlineUpB := utils.MessageSizeBytes(*qry)
++    onlineDnB := utils.MessageSizeBytes(ans)
++
++    idx := argsortDesc(scores, p)
++    topK := *k
++    if topK > len(idx) {
++      topK = len(idx)
++    }
++    for rank := 0; rank < topK; rank++ {
++      fmt.Fprintf(outF, "%d,%d,%d,%d\n",
++        q.id, rank, idx[rank], smoothResult(scores[idx[rank]], p))
++    }
++
++    fmt.Fprintf(timF, "%d,%d,%d,%d,%d,%d,%d\n",
++      q.id, offlineUs, onlineUs,
++      offlineUpB, offlineDnB, onlineUpB, onlineDnB)
++  }
++
++  fmt.Fprintln(os.Stderr, "done")
++}
+diff --git a/go.mod b/go.mod
+index eb731d2..0434f96 100644
+--- a/go.mod
++++ b/go.mod
+@@ -3,7 +3,7 @@ module github.com/ahenzinger/tiptoe
+ go 1.19
+ 
+ require (
+-	github.com/ahenzinger/underhood v0.0.0-20230921190418-f053a81c6385
++	github.com/ahenzinger/underhood v0.0.0-20230922182337-f053a81c6385
+ 	github.com/fatih/color v1.15.0
+ 	github.com/henrycg/simplepir v0.0.0-20230920020624-026ee7bd6783
+ )
+diff --git a/go.sum b/go.sum
+index e90e0d6..8f3e207 100644
+--- a/go.sum
++++ b/go.sum
+@@ -1,5 +1,5 @@
+-github.com/ahenzinger/underhood v0.0.0-20230921190418-2a9868bb7ae0 h1:cV2zEc8MCxRGrSW3lUiFqIeoZTftTMrsGLY0kukm3xQ=
+-github.com/ahenzinger/underhood v0.0.0-20230921190418-2a9868bb7ae0/go.mod h1:CpTs7RM0by3wQbHqw100CZnl4z1cTAtvYr0H1qEj3H8=
++github.com/ahenzinger/underhood v0.0.0-20230922182337-f053a81c6385 h1:7nf+HKpy56MoKmsCy0qYhCiWEZsRNt0mLJPfadoWd9g=
++github.com/ahenzinger/underhood v0.0.0-20230922182337-f053a81c6385/go.mod h1:NEjUXxfqiXkMwVN8elZwQ8fbBf0iwWoOzQhhpeVlSvE=
+ github.com/fatih/color v1.15.0 h1:kOqh6YHBtK8aywxGerMG2Eq3H6Qgoqeo13Bk2Mv/nBs=
+ github.com/fatih/color v1.15.0/go.mod h1:0h5ZqXfHYED7Bhv2ZJamyIOUej9KtShiJESRwBDUSsw=
+ github.com/henrycg/simplepir v0.0.0-20230920020624-026ee7bd6783 h1:EkkT+ti4GCxPiqntQ9ahXxqXWmggdod6TXgZbxg6X/w=
+diff --git a/search/corpus/read_clustered.go b/search/corpus/read_clustered.go
+new file mode 100644
+index 0000000..9736046
+--- /dev/null
++++ b/search/corpus/read_clustered.go
+@@ -0,0 +1,124 @@
++package corpus
++
++import (
++  "io"
++  "os"
++  "fmt"
++  "strconv"
++  "encoding/csv"
++)
++
++import (
++  "github.com/ahenzinger/tiptoe/search/utils"
++  "github.com/ahenzinger/tiptoe/search/embeddings"
++)
++
++// ReadEmbeddingsClusteredCsv reads a CSV produced by an external IVF
++// pipeline (e.g. the Rust scorer-tiptoe port) and returns a Corpus whose
++// embeddingsClusterMap reflects the supplied clustering, exactly as
++// ReadEmbeddingsTxt would for the upstream pre-clustered text format.
++//
++// File layout:
++//   line 1:  numDocs
++//   line 2:  embeddingSlots
++//   line 3:  slotBits
++//   line 4:  numClusters
++//   then one row per document:
++//       <cluster_id>,<int8 slot 0>,<int8 slot 1>,...,<int8 slot D-1>
++//
++// Rows MUST be sorted by cluster_id ascending. Cluster ids must form a
++// contiguous range [0, numClusters-1] with no gaps (mirrors the
++// upstream invariants in NumDocsInCluster).
++func ReadEmbeddingsClusteredCsv(file string) *Corpus {
++  f := utils.OpenFile(file)
++  defer f.Close()
++
++  c := new(Corpus)
++  reader, numDocs, embeddingSlots, slotBits, numClusters := parseClusteredCsvHeader(f)
++  c.params.NumDocs = numDocs
++  c.params.EmbeddingSlots = embeddingSlots
++  c.params.SlotBits = slotBits
++  c.params.checkParams()
++
++  c.embeddings = make([]int8, c.params.EmbeddingSlots*c.params.NumDocs)
++  c.embeddingsClusterMap = make(map[uint]uint, numClusters)
++  c.maxClusterId = uint(numClusters - 1)
++
++  slots := uint(c.params.EmbeddingSlots)
++  prevCluster := int(-1)
++
++  for at := uint(0); ; at++ {
++    row, err := reader.Read()
++    if err == io.EOF {
++      break
++    } else if err != nil {
++      fmt.Printf("%s\n", err)
++      panic("Error reading clustered CSV file")
++    }
++
++    if uint64(len(row)) != 1+c.params.EmbeddingSlots {
++      panic(fmt.Sprintf("Row %d: expected %d columns, got %d",
++        at, 1+c.params.EmbeddingSlots, len(row)))
++    }
++
++    cluster, err := strconv.Atoi(row[0])
++    if err != nil {
++      panic("Error parsing cluster_id")
++    }
++    if cluster < 0 || cluster >= int(numClusters) {
++      panic(fmt.Sprintf("Row %d: cluster_id %d out of range [0,%d)",
++        at, cluster, numClusters))
++    }
++    if cluster < prevCluster {
++      panic(fmt.Sprintf("Row %d: rows must be sorted by cluster_id (saw %d after %d)",
++        at, cluster, prevCluster))
++    }
++    if cluster != prevCluster {
++      // First row of a new cluster: record its starting offset.
++      c.embeddingsClusterMap[uint(cluster)] = at * slots
++      prevCluster = cluster
++    }
++
++    offset := at * slots
++    for i := uint(0); i < slots; i++ {
++      v, err := strconv.Atoi(row[1+i])
++      if err != nil {
++        panic("Error parsing CSV embedding slot")
++      }
++      c.embeddings[offset+i] = embeddings.Clamp(v, c.params.SlotBits)
++    }
++  }
++
++  if uint64(len(c.embeddingsClusterMap)) != numClusters {
++    panic(fmt.Sprintf("Expected %d non-empty clusters, got %d (gaps not allowed)",
++      numClusters, len(c.embeddingsClusterMap)))
++  }
++
++  return c
++}
++
++func parseClusteredCsvHeader(f *os.File) (
++  *csv.Reader, uint64, uint64, uint64, uint64) {
++  var _ io.Reader = f
++  reader := csv.NewReader(f)
++  reader.FieldsPerRecord = -1 // header rows are short
++
++  l1, e1 := reader.Read()
++  l2, e2 := reader.Read()
++  l3, e3 := reader.Read()
++  l4, e4 := reader.Read()
++  if e1 != nil || e2 != nil || e3 != nil || e4 != nil {
++    panic("Error reading clustered CSV header")
++  }
++
++  numDocs, e1 := strconv.Atoi(l1[0])
++  embeddingSlots, e2 := strconv.Atoi(l2[0])
++  slotBits, e3 := strconv.Atoi(l3[0])
++  numClusters, e4 := strconv.Atoi(l4[0])
++  if e1 != nil || e2 != nil || e3 != nil || e4 != nil {
++    panic("Error parsing clustered CSV header")
++  }
++
++  reader.FieldsPerRecord = 0 // re-enable equal-field-count check for body rows
++  return reader, uint64(numDocs), uint64(embeddingSlots), uint64(slotBits), uint64(numClusters)
++}

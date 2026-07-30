@@ -1,0 +1,56 @@
+run-id = "1780841960"
+machine-id = "64451e77"
+git-sha = "095619f98ca62370d6cc1e0500ee4afd45400154"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-06-07T14:19:20Z"
+finished-at = "2026-06-07T14:28:52Z"
+duration-secs = 572
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-124-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = true
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+peak-rss-bytes = 2258477056
+device = "cpu"
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 1.8908667879999999
+cluster-count = 317
+m-total = 100000
+
+[memory]
+cpu-minor-faults = 2611359
+cpu-major-faults = 0
+
+[scheme-config]
+bfv-params = "tiptoe-text"
+lwe-params = "tiptoe-text"
+max-iter = 25
+n-centroids = 317
+quantisation-bits-values = [3]
+scheme = "tiptoe"
+train-seed = 42
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

@@ -1,0 +1,74 @@
+run-id = "1778617347"
+machine-id = "bbcbcaef"
+git-sha = "15986749a5f3b6d95882eda2d61952469233865c"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-12T20:22:27Z"
+finished-at = "2026-05-12T20:25:35Z"
+duration-secs = 188
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-59-generic"
+cpu-governor = "unknown"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 126
+numactl-binding = "none"
+batch-sizes = [1]
+device = "gpu"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/bbcbcaef/1778617347"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "fbe50cbcb22e936cc46aeffe0fbd64932f46581f424366e4a04638be1e9c0a98"
+  bytes  = 2769962
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "0917eb60daddab4a6f18e9edc2324e813dafb892fc324cac5ae9f49d1e9467b8"
+  bytes  = 2511656
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 5.491332056
+cluster-count = 317
+m-total = 100000
+
+[gpu]
+sku = "v100"
+location = "cloud"
+memory-bytes = 85899345920
+
+[gpu.cloud]
+provider = "epfl-rcp"
+instance-type = "rcp-runai-v100"
+region = "epfl"
+driver-version = "580.82.07"
+cuda-version = "12.4.1"
+
+[scheme-config]
+max-iter = 25
+n-centroids = 317
+nprobe-values = [1, 2, 4, 8, 16, 32, 64, 128]
+scheme = "plaintext"
+train-seed = 42
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

@@ -1,0 +1,87 @@
+run-id = "1781030622"
+machine-id = "64451e77"
+git-sha = "bb8c0ce5e386c87df525e8943d8c0b8fce237368"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-06-09T18:43:42Z"
+finished-at = "2026-06-09T21:22:35Z"
+duration-secs = 9533
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-124-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+cgroup-memory-bytes = 134217728000
+peak-rss-bytes = 105489309696
+device = "gpu"
+
+[campaign]
+id = "w4-msmarco-full-gpu-20260609"
+title = "Plan 27 8.8M GPU sweeps (2026-06-09 corpus baseline)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/64451e77/1781030622"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "4b36e558f2a992850d6c9411f754bac07b7866fd97705c95722b0d53e673d649"
+  bytes  = 2383457
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "b432e787e2ed8e4392ba4a31fd6e2c81cab60a5de9d7868120bd6da48b73fbb8"
+  bytes  = 2776741
+
+[ivf]
+n-centroids = 2967
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = false
+build-duration-secs = 7181.845940132
+cluster-count = 2967
+m-total = 8800000
+
+[gpu]
+sku = "rtx-5000-ada"
+location = "local"
+memory-bytes = 34351349760
+vram-budget-bytes = 27487790694
+peak-vram-bytes = 31067668480
+
+[memory]
+cpu-minor-faults = 130634663
+cpu-major-faults = 111
+gpu-get-count = 12960000
+gpu-upload-count = 14926
+gpu-eviction-count = 0
+gpu-bytes-uploaded-total = 137490659328
+
+[scheme-config]
+beta-fixed = 0.0
+max-iter = 25
+n-centroids = 2967
+nprobe-values = [1, 8, 64, 256, 1024, 2967]
+scheme = "sap-ivf"
+sweep = "nprobe"
+train-seed = 42
+upload-seed = 42
+
+[dataset]
+path = "/mnt/data/rpereira/svs-data/msmarco-full"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 8800000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

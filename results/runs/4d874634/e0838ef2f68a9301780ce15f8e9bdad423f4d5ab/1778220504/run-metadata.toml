@@ -1,0 +1,68 @@
+run-id = "1778220504"
+machine-id = "4d874634"
+git-sha = "e0838ef2f68a9301780ce15f8e9bdad423f4d5ab"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-08T06:08:24Z"
+finished-at = "2026-05-08T06:10:33Z"
+duration-secs = 129
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-110-generic"
+cpu-governor = "schedutil"
+notes = ""
+no-cache = false
+breakdown = true
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/4d874634/1778220504"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "296f2fac1c4218ac4bd2b2bc7d6e3d2350c1dc6e5d20d01ca72bcf7884a02dd0"
+  bytes  = 216
+
+  [[bulk.files]]
+  name   = "substep-breakdown.csv"
+  sha256 = "ec3b00758481bd2ab189de4dcf03a8eebd8978393f8c8f0bebbe7abb446c6a76"
+  bytes  = 369405
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "23b1feaf2d7ec0d7fb7cef74f437d06632bf0d30cb145c8f4ab093df1e787b60"
+  bytes  = 257745
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 29.759408422
+cluster-count = 1
+m-total = 100000
+
+[scheme-config]
+b = 17
+ell0 = 1024
+k = 268
+key-seed = "42*32"
+n = 1292
+params = "Sec128"
+quantisation-q = 1048576
+s = 76
+scheme = "emvp"
+trapdoor = "option-b-placeholder-r"
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

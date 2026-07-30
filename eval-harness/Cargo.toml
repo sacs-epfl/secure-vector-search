@@ -1,0 +1,50 @@
+[package]
+name = "eval-harness"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+# Plan 17 — forwards to each scorer crate's `gpu` feature so
+# `cargo build -p eval-harness --features gpu` actually compiles in
+# every cuVS / CUDA code path that has landed. Without this feature,
+# `--device gpu` bails at runtime with the corresponding scorer's
+# `GpuFeatureNotEnabled` variant. EMVP / BN GPU paths (Plan 17
+# Steps 3–4) will be added to this list as they land.
+gpu = [
+    "scorer-plaintext/gpu",
+    "scorer-sap/gpu",
+    "scorer-emvp/gpu",
+    "scorer-bntm/gpu",
+    "dep:scorer-gpu-common",
+]
+
+[dependencies]
+scorer-core      = { workspace = true }
+scorer-sap       = { path = "../scorer-sap" }
+scorer-plaintext = { path = "../scorer-plaintext" }
+scorer-emvp      = { path = "../scorer-emvp" }
+scorer-tiptoe    = { path = "../scorer-tiptoe" }
+scorer-bntm      = { path = "../scorer-bntm" }
+ivf-index        = { path = "../ivf-index" }
+# Plan 27 — only pulled when the `gpu` feature flips on. Used by the
+# eval binary to resolve the streaming VRAM budget once per run
+# (via NVML 80 % auto-detect or the `--gpu-vram-budget-bytes`
+# override) and to sample the realised peak written into
+# `run-metadata.toml [gpu]`.
+scorer-gpu-common = { workspace = true, optional = true }
+tokio            = { workspace = true, features = ["full"] }
+async-trait      = { workspace = true }
+clap             = { workspace = true }
+rayon            = { workspace = true }
+anyhow           = { workspace = true }
+thiserror        = { workspace = true }
+indicatif        = { workspace = true }
+sysinfo          = { workspace = true }
+serde            = { workspace = true }
+toml             = "0.8"
+os_info          = "3"
+
+[dev-dependencies]
+rand        = { workspace = true }
+rand_chacha = { workspace = true }

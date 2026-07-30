@@ -1,0 +1,129 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % --------------------------------------------------------------------
+  % Per-query substep breakdown, absolute milliseconds.
+  % Three panels stacked vertically, each sorted ascending by total
+  % time (smallest at the bottom, biggest at the top of each panel):
+  %
+  %   Top:    all 8 schemes; x-axis spans \tiptoe's ~4 s encode
+  %           segment, IVF schemes look like slivers near zero.
+  %   Middle: zoom into plaintext + *-ivf — bntm-ivf still dominates
+  %           the scale (~300 ms verify+decode).
+  %   Bottom: same as middle minus bntm-ivf, so plaintext, sap-ivf
+  %           and emvp-ivf show their substep composition under
+  %           ~15 ms.
+  %
+  % preprocess.py emits all three TSVs (substep-breakdown-absolute.tsv,
+  % -ivf.tsv, -ivf-no-bntm.tsv), each sorted by total ascending.
+  % --------------------------------------------------------------------
+  \pgfplotstableread[col sep=tab]{\datadir/substep-breakdown-absolute.tsv}\subsAll
+  \IfFileExists{\datadir/substep-breakdown-absolute-ivf.tsv}{%
+    \pgfplotstableread[col sep=tab]{\datadir/substep-breakdown-absolute-ivf.tsv}\subsIvf}{}
+  \IfFileExists{\datadir/substep-breakdown-absolute-ivf-no-bntm.tsv}{%
+    \pgfplotstableread[col sep=tab]{\datadir/substep-breakdown-absolute-ivf-no-bntm.tsv}\subsIvfNoBn}{}
+
+  \pgfplotsset{
+    /pgfplots/substeps-bars/.style={
+      bar cycle list/.style={cycle list/Paired-12},
+      xbar stacked,
+      xmajorgrids,
+      every axis plot/.append style={fill, fill opacity=0.9},
+      bar width=10pt,
+      width=4in,
+      ytick=data,
+      y tick label style={font=\sffamily\footnotesize},
+      x tick label style={font=\sffamily\footnotesize},
+      xlabel={Per-query mean (ms)},
+      xlabel style={font=\sffamily\footnotesize},
+      enlarge y limits=0.18,
+      title style={font=\sffamily\footnotesize, anchor=south, yshift=2pt},
+    },
+  }
+
+  \begin{groupplot}[
+    group style={
+      group size=1 by 3,
+      vertical sep=1.7cm,
+    },
+    substeps-bars,
+  ]
+
+  % --------------------------------------------------------------------
+  % Top — all 8 schemes (sorted ascending by total).
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    height=2.4in,
+    title={all schemes},
+    yticklabels from table={\subsAll}{scheme},
+    legend to name=substepsLegend,
+    legend columns=-1,
+    legend style={
+      draw=none, fill=white, font=\sffamily\footnotesize,
+      /tikz/every even column/.append style={column sep=4pt},
+    },
+  ]
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{route}/1000}]{\subsAll};
+    \addlegendentry{route}
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{encode}/1000}]{\subsAll};
+    \addlegendentry{encode}
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{server_compute}/1000}]{\subsAll};
+    \addlegendentry{server-compute}
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{verify}/1000}]{\subsAll};
+    \addlegendentry{verify}
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{decompress}/1000}]{\subsAll};
+    \addlegendentry{decompress}
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{decode}/1000}]{\subsAll};
+    \addlegendentry{decode}
+    \addplot+ table[y expr=\coordindex, x expr={\thisrow{merge}/1000}]{\subsAll};
+    \addlegendentry{merge}
+
+  % --------------------------------------------------------------------
+  % Middle — IVF schemes only (plaintext + *-ivf).
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    height=1.6in,
+    title={plaintext and \texttt{*-ivf} only},
+    yticklabels from table={\subsIvf}{scheme},
+  ]
+    \IfFileExists{\datadir/substep-breakdown-absolute-ivf.tsv}{%
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{route}/1000}]{\subsIvf};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{encode}/1000}]{\subsIvf};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{server_compute}/1000}]{\subsIvf};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{verify}/1000}]{\subsIvf};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{decompress}/1000}]{\subsIvf};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{decode}/1000}]{\subsIvf};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{merge}/1000}]{\subsIvf};
+    }{\node {no IVF subset};}
+
+  % --------------------------------------------------------------------
+  % Bottom — same as middle without bntm-ivf, which dwarfs the rest.
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    height=1.4in,
+    title={plaintext and \texttt{*-ivf} except \texttt{bntm-ivf}},
+    yticklabels from table={\subsIvfNoBn}{scheme},
+    enlarge y limits=0.3,
+  ]
+    \IfFileExists{\datadir/substep-breakdown-absolute-ivf-no-bntm.tsv}{%
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{route}/1000}]{\subsIvfNoBn};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{encode}/1000}]{\subsIvfNoBn};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{server_compute}/1000}]{\subsIvfNoBn};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{verify}/1000}]{\subsIvfNoBn};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{decompress}/1000}]{\subsIvfNoBn};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{decode}/1000}]{\subsIvfNoBn};
+      \addplot+ table[y expr=\coordindex, x expr={\thisrow{merge}/1000}]{\subsIvfNoBn};
+    }{\node {no data};}
+
+  \end{groupplot}
+
+  % Single shared legend, centred above the top panel.
+  % yshift bumped above the panel's `title={…}` — the old 4pt put
+  % the legend strip directly on top of "all schemes (\tiptoe sets
+  % the scale)".
+  \node[anchor=south, inner sep=0pt, yshift=18pt]
+    at (group c1r1.north) {\ref{substepsLegend}};
+\end{tikzpicture}
+\end{document}

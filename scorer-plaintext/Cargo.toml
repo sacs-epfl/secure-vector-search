@@ -1,0 +1,41 @@
+[package]
+name = "scorer-plaintext"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+# Plan 17 step 1 — pulls cuvs-rs + libcuvs (via the conda env documented
+# in docs/envs/README.md). CPU-only builds (default) never touch cuvs.
+# Plan 27: also pulls `scorer-gpu-common` for the streaming
+# ClusterStore + NVML peak sampler, and `cudarc` for the
+# CudaContext / CudaStream types the store hands back.
+gpu = ["dep:cuvs", "dep:cuvs-sys", "dep:ndarray", "dep:scorer-gpu-common", "dep:cudarc"]
+
+[dependencies]
+scorer-core = { workspace = true }
+ivf-index   = { workspace = true }
+async-trait = { workspace = true }
+thiserror   = { workspace = true }
+tokio       = { workspace = true }
+rand        = { workspace = true }
+rand_chacha = { workspace = true }
+indicatif   = { workspace = true }
+cuvs        = { workspace = true, optional = true }
+# Plan 27: `cuvs-sys::cuvsRMMFree` for manual device-buffer free on
+# `CuvsCluster::Drop`. cuvs-rs's high-level `BfIndex::build` consumes
+# the `ManagedTensor` by value and the C++ index keeps a non-owning
+# view, so the dataset device buffer's DLPack deleter has to be
+# suppressed at build time to keep the buffer alive — which leaks it.
+# Streaming + LRU eviction made the leak compound across uploads;
+# calling `cuvsRMMFree` from the cluster's Drop returns the RMM
+# pool page when an LRU eviction discards a cuvs cluster.
+cuvs-sys    = { version = "26.4", optional = true }
+ndarray     = { workspace = true, optional = true }
+scorer-gpu-common = { workspace = true, optional = true, features = ["cuvs"] }
+# cudarc — needed for `CudaContext` / `CudaStream` types that flow
+# through `ClusterStore`. The cuVS-backed scorers still run their
+# compute on cuVS's internal stream; the cudarc streams are wired
+# up alongside so the API surface is uniform across cuVS + cudarc
+# scorers (Plan 27).
+cudarc      = { workspace = true, optional = true }

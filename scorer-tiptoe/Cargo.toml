@@ -1,0 +1,30 @@
+[package]
+name = "scorer-tiptoe"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+scorer-core  = { workspace = true }
+ivf-index    = { workspace = true }
+async-trait  = { workspace = true }
+thiserror    = { workspace = true }
+tokio        = { workspace = true }
+rand         = { workspace = true }
+rand_chacha  = { workspace = true }
+rand_distr   = { workspace = true }
+rayon        = { workspace = true }
+fhe          = { workspace = true }
+fhe-traits   = { workspace = true }
+# fhe / fhe-traits 0.1.1 pin `rand ^0.9.2`, which is incompatible with
+# the workspace's `rand 0.10`. The renamed `rand_fhe` dep gives us the
+# 0.9 `RngCore + CryptoRng` traits required by `FheEncrypter::try_encrypt`
+# without colliding with the workspace's rand version. Production code
+# in `bfv/compress.rs` consumes this for the §6.2 query-token path.
+rand_fhe         = { package = "rand",         version = "0.9" }
+# `rand_chacha_fhe` (rand_chacha 0.9) supplies a `Send`-able seedable
+# RNG implementing the rand-0.9 traits required by the BFV side of the
+# per-query orchestration in `ranking.rs`.
+rand_chacha_fhe  = { package = "rand_chacha",  version = "0.9" }
+
+[dev-dependencies]
+tempfile = "3"

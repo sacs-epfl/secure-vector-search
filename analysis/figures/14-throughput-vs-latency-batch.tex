@@ -1,0 +1,70 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    % Plan 23 W4 — throughput vs per-query latency, batch size as the
+    % operating-point parameter. Points along each per-scheme line
+    % correspond to B ∈ {1, 8, 64, 256} (or whatever sweep the
+    % producer ran). Log-log so the regime crossover is visible:
+    % schemes that retain a positive throughput slope as B grows are
+    % amortising fixed overhead; schemes that flatten quickly are
+    % compute-bound at the chosen m (per ADR 010 Addendum 2 § Paper
+    % framing — the regime-crossover story is the contribution).
+    xlabel={Per-query latency (ms, amortised at B$>$1)},
+    ylabel={Aggregate throughput (queries/s)},
+    xmode=log,
+    ymode=log,
+    % Fallback ranges so the figure renders before step~9 lands real
+    % B$>$1 data — pgfplots can't infer log-log ranges from
+    % zero-or-one points. Producer overrides via real data points
+    % expand the range as needed.
+    xmin=0.01, xmax=10000,
+    ymin=0.1, ymax=100000,
+    every axis plot/.append style={
+      mark=*,
+      mark size=2pt,
+      error bars/y dir=both,
+      error bars/y explicit,
+    },
+    legend columns=3,
+  ]
+    \IfFileExists{\datadir/throughput-vs-latency-batch-plaintext.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-plaintext.tsv};
+      \addlegendentry{\plaintext+IVF}
+    }{}
+    \IfFileExists{\datadir/throughput-vs-latency-batch-sap.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-sap.tsv};
+      \addlegendentry{\sap}
+    }{}
+    \IfFileExists{\datadir/throughput-vs-latency-batch-sap-ivf.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-sap-ivf.tsv};
+      \addlegendentry{\sap+IVF}
+    }{}
+    \IfFileExists{\datadir/throughput-vs-latency-batch-emvp.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-emvp.tsv};
+      \addlegendentry{\emvp}
+    }{}
+    \IfFileExists{\datadir/throughput-vs-latency-batch-emvp-ivf.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-emvp-ivf.tsv};
+      \addlegendentry{\emvp+IVF}
+    }{}
+    \IfFileExists{\datadir/throughput-vs-latency-batch-bntm.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-bntm.tsv};
+      \addlegendentry{\bntm}
+    }{}
+    \IfFileExists{\datadir/throughput-vs-latency-batch-bntm-ivf.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, y=qps, y error=qps_rep_ci95]
+        {\datadir/throughput-vs-latency-batch-bntm-ivf.tsv};
+      \addlegendentry{\bntm+IVF}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

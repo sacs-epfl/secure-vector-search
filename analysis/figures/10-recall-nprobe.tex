@@ -1,0 +1,36 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    xlabel={\texttt{nprobe}},
+    ylabel={Recall@$k$},
+    xmode=log,
+    log basis x={2},
+    ymin=0, ymax=1,
+    every axis plot/.append style={smooth},
+  ]
+    \IfFileExists{\datadir/recall-nprobe-plaintext.tsv}{
+      \addplot+ table[col sep=tab, x=nprobe, y=recall_mean]
+        {\datadir/recall-nprobe-plaintext.tsv};
+      \addlegendentry{\plaintext+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-nprobe-sap-ivf.tsv}{
+      \addplot+ table[col sep=tab, x=nprobe, y=recall_mean]
+        {\datadir/recall-nprobe-sap-ivf.tsv};
+      \addlegendentry{\sap+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-nprobe-emvp-ivf.tsv}{
+      \addplot+ table[col sep=tab, x=nprobe, y=recall_mean]
+        {\datadir/recall-nprobe-emvp-ivf.tsv};
+      \addlegendentry{\emvp+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-nprobe-bntm-ivf.tsv}{
+      \addplot+ table[col sep=tab, x=nprobe, y=recall_mean]
+        {\datadir/recall-nprobe-bntm-ivf.tsv};
+      \addlegendentry{\bntm+IVF}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

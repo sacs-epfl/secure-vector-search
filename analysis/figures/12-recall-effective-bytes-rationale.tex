@@ -1,0 +1,16 @@
+Hardware-agnostic ``intuition pump''. The x-axis is the analytical
+proxy \texttt{effective\_bytes\_per\_query} --- bytes the matrix
+kernel streams across per query, not wire bytes --- which is
+computable without a GPU run and tracks bandwidth-bound throughput
+on any substrate. The asymmetry between schemes is structural:
+plaintext and \sap stream \texttt{dim$\times$4} bytes per scored
+vector, \emvp+IVF streams \texttt{$m\cdot s\cdot8$} (the per-cluster
+response shape, $s=76$ at SEC128), \bntm+IVF streams just
+\texttt{$m\cdot8$} (length-$m$ response), and \tiptoe streams
+\texttt{$m_{\max}\cdot n_{\text{lwe}}\cdot8$} (the SimplePIR matrix
+the kernel touches per query, with the 64-bit element penalty
+baked in). \tiptoe is plotted dotted because its number is the
+analytical proxy by construction --- no measured GPU run --- since
+its bandwidth ordering against the cryptographic schemes is
+already determined by the matrix shape regardless of the substrate
+that runs the GEMV.

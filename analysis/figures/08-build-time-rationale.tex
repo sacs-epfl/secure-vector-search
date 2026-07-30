@@ -1,0 +1,8 @@
+Only first-build (cache-miss) timings are shown --- warm-cache
+reloads are sub-millisecond and would dominate any aggregate.
+Build time is paid once per client per corpus and amortises
+across every subsequent query, so high build cost is only a
+problem when the corpus changes often. \bntm+IVF's larger build
+relative to \bntm-flat is the per-cluster encrypted-matrix
+construction (one $M_{enc}$ per cluster, a factor of $\sim
+n_{centroids}$).

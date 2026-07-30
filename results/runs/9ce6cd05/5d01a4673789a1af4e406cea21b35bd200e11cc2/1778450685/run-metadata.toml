@@ -1,0 +1,74 @@
+run-id = "1778450685"
+machine-id = "9ce6cd05"
+git-sha = "5d01a4673789a1af4e406cea21b35bd200e11cc2"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-10T22:04:45Z"
+finished-at = "2026-05-10T22:26:20Z"
+duration-secs = 1295
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "6.8.0-59-generic"
+cpu-governor = "schedutil"
+notes = ""
+no-cache = false
+breakdown = true
+parallel-threads = 56
+numactl-binding = "none"
+device = "cpu"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/9ce6cd05/1778450685"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "763727dd4b41a4c522b4b7d8b0526db698b601fec7fee3eee39071a8fec7cbc7"
+  bytes  = 281
+
+  [[bulk.files]]
+  name   = "substep-breakdown.csv"
+  sha256 = "88c3af7c7be11b1cfdaf80ab1d48b7e4d11e469c29d5ee84b5ea8f304dae38b0"
+  bytes  = 511351
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "36a35cb15eedcba84039023dc1c45db2d12a31048dc7e7942c78436a36306045"
+  bytes  = 487767
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = false
+build-duration-secs = 17.771004199
+cluster-count = 1
+m-total = 100000
+
+[scheme-config]
+delta = 0.5
+epsilon = 0.5
+key-seed = "42*32"
+lambda-prime = 3
+mu = 0.03125
+n = 1024
+n-1 = 512
+params = "Sec128"
+quantisation-q = 1048576
+quantisation-q-bits = 20
+scheme = "bntm"
+trapdoor = "option-b-placeholder-hl-s"
+verification-enabled = false
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

@@ -1,0 +1,50 @@
+The CDF shape at the operating point distinguishes ``predictable
+latency'' (steep, near-vertical curves) from ``long tails''
+(curves that flatten before reaching CDF~=~1). Each scheme's
+curve is sourced from the quality\_param closest to 90\,\% recall,
+so cross-scheme comparison is at \emph{matched} recall, not
+matched config. A scheme whose curve sits to the right at every
+percentile pays its latency cost everywhere, not just on the
+mean.
+
+\smallskip
+\IfFileExists{\datadir/latency-cdf-summary.tsv}{%
+  \begin{center}
+  \pgfplotstabletypeset[
+    col sep=tab,
+    every head row/.style={
+      before row=\toprule, after row=\midrule,
+    },
+    every last row/.style={after row=\bottomrule},
+    columns={scheme, config, recall_at_op, mean_ms, median_ms, p95_ms, p99_ms},
+    columns/scheme/.style={string type, column name=Scheme},
+    columns/config/.style={string type, column name=Config},
+    columns/recall_at_op/.style={
+      column name={Recall@$k$}, column type=r,
+      fixed, fixed zerofill, precision=3,
+    },
+    columns/mean_ms/.style={
+      column name={Mean (ms)}, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/median_ms/.style={
+      column name={Median (ms)}, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/p95_ms/.style={
+      column name={p95 (ms)}, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+    columns/p99_ms/.style={
+      column name={p99 (ms)}, column type=r,
+      fixed, fixed zerofill, precision=2,
+    },
+  ]{\datadir/latency-cdf-summary.tsv}
+  \end{center}
+  Mean / median / p95 / p99 are over the per-query latencies at the
+  config row (the quality knob whose mean recall is closest to 90\,\%).
+  A large mean--median gap signals a heavy right tail; mean and median
+  close together means the distribution is concentrated near the
+  median --- exactly what the CDF curve's steepness encodes
+  graphically.
+}{}

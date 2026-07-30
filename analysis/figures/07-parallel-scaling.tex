@@ -1,0 +1,174 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % Per-scheme colour mapping (Dark2 palette, stable across both panels
+  % and across the pinned/unpinned cut so a reader tracks one colour
+  % through the whole figure). The palette index also drives the marker
+  % so each scheme's identity is doubly encoded.
+  \pgfplotsset{
+    /pgfplots/pinned/.style   = {solid,           thick},
+    /pgfplots/unpinned/.style = {dashed,          thick},
+    /pgfplots/scheme1/.style  = {color=Dark2-A, mark=*},
+    /pgfplots/scheme2/.style  = {color=Dark2-B, mark=square*},
+    /pgfplots/scheme3/.style  = {color=Dark2-C, mark=triangle*},
+    /pgfplots/scheme4/.style  = {color=Dark2-D, mark=diamond*},
+    /pgfplots/scheme5/.style  = {color=Dark2-E, mark=pentagon*},
+    /pgfplots/scheme6/.style  = {color=Dark2-F, mark=otimes*},
+    /pgfplots/topology guide/.style = {gray, dashed, no marks, forget plot, thin},
+    /pgfplots/reference/.style      = {black, densely dashdotted, no marks, forget plot, thin},
+  }
+
+  \begin{groupplot}[
+    group style={
+      group size=1 by 2,
+      vertical sep=0.6cm,
+      x descriptions at=edge bottom,
+    },
+    width=3.25in, height=2in,
+    xmode=log, log basis x=2,
+    xmin=0.85, xmax=80,
+    xtick={1,2,4,8,16,32,64},
+    xticklabels={1,2,4,8,16,32,64},
+  ]
+
+  % --------------------------------------------------------------------
+  % Panel A: latency vs threads (log-log)
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    ylabel={Mean latency (ms)},
+    ymode=log,
+    ymin=0.5, ymax=8000,
+    legend style={at={(0.5,1.18)}, anchor=south, font=\sffamily\footnotesize, draw=none, fill=white, /tikz/every even column/.append style={column sep=4pt}},
+    legend columns=3,
+  ]
+
+    % Topology guides: socket boundary (N=16) and SMT boundary (N=32).
+    % Coordinates straddle the explicit ymin/ymax so the line spans the
+    % full visible range; pgfplots clips to the axis frame.
+    \addplot[topology guide] coordinates {(16, 0.5) (16, 8000)};
+    \addplot[topology guide] coordinates {(32, 0.5) (32, 8000)};
+
+    \IfFileExists{\datadir/parallel-scaling-plaintext.tsv}{
+      \addplot+[scheme1, pinned, discard if not={binding}{physcpubind=0-15,membind=0}]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-plaintext.tsv};
+      \addlegendentry{\plaintext}
+      \addplot+[scheme1, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-plaintext.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-sap-ivf.tsv}{
+      \addplot+[scheme2, pinned, discard if not={binding}{physcpubind=0-15,membind=0}]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-sap-ivf.tsv};
+      \addlegendentry{\sap+IVF}
+      \addplot+[scheme2, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-sap-ivf.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-emvp-ivf.tsv}{
+      \addplot+[scheme3, pinned, discard if not={binding}{physcpubind=0-15,membind=0}]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-emvp-ivf.tsv};
+      \addlegendentry{\emvp+IVF}
+      \addplot+[scheme3, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-emvp-ivf.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-bntm-ivf.tsv}{
+      \addplot+[scheme4, pinned, discard if not={binding}{physcpubind=0-15,membind=0}]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-bntm-ivf.tsv};
+      \addlegendentry{\bntm+IVF}
+      \addplot+[scheme4, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-bntm-ivf.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-tiptoe.tsv}{
+      \addplot+[scheme5, pinned, discard if not={binding}{physcpubind=0-15,membind=0}]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-tiptoe.tsv};
+      \addlegendentry{\tiptoe}
+      \addplot+[scheme5, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-tiptoe.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-tiptoe-go.tsv}{
+      \addplot+[scheme6, pinned, discard if not={binding}{physcpubind=0-15,membind=0}]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-tiptoe-go.tsv};
+      \addlegendentry{\tiptoego}
+      \addplot+[scheme6, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=latency_ms_mean]
+        {\datadir/parallel-scaling-tiptoe-go.tsv};
+    }{}
+
+  % --------------------------------------------------------------------
+  % Panel B: parallel efficiency vs threads (linear y)
+  % --------------------------------------------------------------------
+  \nextgroupplot[
+    xlabel={Threads $N$},
+    ylabel={Parallel efficiency $T(1)/(N\,T(N))$},
+    ymin=0, ymax=1.05,
+    extra y ticks={1.0},
+    extra y tick labels={},
+    extra y tick style={grid=major, grid style={black, densely dashdotted, thin}},
+  ]
+
+    \addplot[topology guide] coordinates {(16, 0) (16, 1.05)};
+    \addplot[topology guide] coordinates {(32, 0) (32, 1.05)};
+
+    \IfFileExists{\datadir/parallel-scaling-plaintext.tsv}{
+      \addplot+[scheme1, pinned, discard if not={binding}{physcpubind=0-15,membind=0}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-plaintext.tsv};
+      \addplot+[scheme1, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-plaintext.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-sap-ivf.tsv}{
+      \addplot+[scheme2, pinned, discard if not={binding}{physcpubind=0-15,membind=0}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-sap-ivf.tsv};
+      \addplot+[scheme2, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-sap-ivf.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-emvp-ivf.tsv}{
+      \addplot+[scheme3, pinned, discard if not={binding}{physcpubind=0-15,membind=0}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-emvp-ivf.tsv};
+      \addplot+[scheme3, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-emvp-ivf.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-bntm-ivf.tsv}{
+      \addplot+[scheme4, pinned, discard if not={binding}{physcpubind=0-15,membind=0}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-bntm-ivf.tsv};
+      \addplot+[scheme4, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-bntm-ivf.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-tiptoe.tsv}{
+      \addplot+[scheme5, pinned, discard if not={binding}{physcpubind=0-15,membind=0}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-tiptoe.tsv};
+      \addplot+[scheme5, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-tiptoe.tsv};
+    }{}
+    \IfFileExists{\datadir/parallel-scaling-tiptoe-go.tsv}{
+      \addplot+[scheme6, pinned, discard if not={binding}{physcpubind=0-15,membind=0}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-tiptoe-go.tsv};
+      \addplot+[scheme6, unpinned, discard if not={binding}{none}, forget plot]
+        table[col sep=tab, x=threads, y=parallel_efficiency]
+        {\datadir/parallel-scaling-tiptoe-go.tsv};
+    }{}
+
+  \end{groupplot}
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,84 @@
+run-id = "1781020826"
+machine-id = "64451e77"
+git-sha = "bb8c0ce5e386c87df525e8943d8c0b8fce237368"
+git-dirty = false
+git-branch = "main"
+started-at = "2026-06-09T16:00:26Z"
+finished-at = "2026-06-09T18:43:35Z"
+duration-secs = 9789
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-124-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+cgroup-memory-bytes = 134217728000
+peak-rss-bytes = 109661761536
+device = "gpu"
+
+[campaign]
+id = "w4-msmarco-full-gpu-20260609"
+title = "Plan 27 8.8M GPU sweeps (2026-06-09 corpus baseline)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/64451e77/1781020826"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "9a492024e007e6413bdfcc19641a410aed125fb201dda6d1b356955bda2bbb71"
+  bytes  = 2203580
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "0da977b77071507f6355f784d7127ecd56fcd6bf03412d2eed162f6a402ceda0"
+  bytes  = 2056736
+
+[ivf]
+n-centroids = 2967
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = false
+build-duration-secs = 7544.336005272
+cluster-count = 2967
+m-total = 8800000
+
+[gpu]
+sku = "rtx-5000-ada"
+location = "local"
+memory-bytes = 34351349760
+vram-budget-bytes = 27487790694
+peak-vram-bytes = 31071862784
+
+[memory]
+cpu-minor-faults = 119539945
+cpu-major-faults = 20
+gpu-get-count = 12960000
+gpu-upload-count = 14942
+gpu-eviction-count = 0
+gpu-bytes-uploaded-total = 137796946944
+
+[scheme-config]
+max-iter = 25
+n-centroids = 2967
+nprobe-values = [1, 8, 64, 256, 1024, 2967]
+scheme = "plaintext"
+train-seed = 42
+
+[dataset]
+path = "/mnt/data/rpereira/svs-data/msmarco-full"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 8800000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

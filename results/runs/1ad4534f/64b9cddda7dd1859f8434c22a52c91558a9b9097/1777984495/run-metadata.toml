@@ -1,0 +1,45 @@
+run-id = "1777984495"
+machine-id = "1ad4534f"
+git-sha = "64b9cddda7dd1859f8434c22a52c91558a9b9097"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-05T12:34:55Z"
+finished-at = "2026-05-05T12:49:39Z"
+duration-secs = 884
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+kernel-version = "unknown"
+cpu-governor = "unknown"
+notes = ""
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/1ad4534f/1777984495"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "b9888c18eadf7212e20e91f4faca84bddaba7105d9f18a568f0598bd61d44b5f"
+  bytes  = 284837
+
+[scheme-config]
+b = 17
+ell0 = 1024
+k = 268
+key-seed = "42*32"
+n = 1292
+params = "Sec128"
+quantisation-q = 1048576
+s = 76
+scheme = "emvp"
+trapdoor = "option-b-placeholder-r"
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

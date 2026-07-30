@@ -1,0 +1,33 @@
+Throughput vs per-query latency, with batch size $B \in \{1, 8, 64,
+256\}$ as the operating-point parameter along each per-scheme line.
+The x-axis is the \emph{amortised} per-query latency
+($\text{wallclock}/B$ when $B>1$) so that all points share a
+per-query unit; the y-axis is aggregate throughput in queries/s.
+Both axes are log so the regime crossover between schemes is
+visible without one scheme's range squashing another's.
+
+Per ADR~010 Addendum~2 (D5 retired, regime-characterization
+contribution): a scheme that traces a line with positive throughput
+slope across the batch sweep is amortising fixed overhead per
+\texttt{score\_batch} call (memory-bandwidth on the cached matrix,
+rayon partitioning); a scheme that flattens quickly is
+compute-bound at the chosen $m$. \emvp's step~7 envelope-gate
+measurement (commit \texttt{06c8f5b}) anchored the latter case at
+$1.23\times$ at $B=64$ on \texttt{sacs006} for $m=100k$; the cross-
+scheme picture here generalises that finding.
+
+Each scheme's per-line operating point is its
+quality-param-value closest to recall $\approx 0.9$ on the B=1
+baseline; the recall actually achieved is recorded in the
+\texttt{recall\_mean} column of each TSV so the comparison is at
+comparable recall, not comparable nprobe (Plan~23 \S~Decision~3).
+\tiptoe is omitted (ADR~010 Decision~3 cost-floor exclusion ---
+BFV \texttt{apply\_hint} bounds batched speedup at $\le 2\times$;
+figure~02 carries \tiptoe's per-query throughput at $B=1$).
+
+Error bars on each point are 95\% CIs on the mean throughput,
+propagated from the amortised-latency standard deviation across
+(rep $\times$ chunk-position) measurements at that batch size.
+The CI captures combined rep noise and chunk-to-chunk wallclock
+jitter; small CIs in the compute-bound regime confirm the
+plateau is real rather than measurement-limited.

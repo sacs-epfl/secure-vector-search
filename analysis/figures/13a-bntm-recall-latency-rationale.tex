@@ -1,0 +1,6 @@
+The gap between an \textsf{off} marker and its \textsf{on}
+counterpart is the end-to-end wall-clock verification overhead --- it
+includes side effects (RNG warm-up, branch prediction state) on top of
+the Protocol~2 substep itself. The Sec128-target trial count is
+$\lambda' = 3$; halving $\lambda'$ would roughly halve the gap but also
+weaken the malicious-server detection bound.

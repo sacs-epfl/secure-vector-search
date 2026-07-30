@@ -1,0 +1,67 @@
+run-id = "1780841820"
+machine-id = "64451e77"
+git-sha = "095619f98ca62370d6cc1e0500ee4afd45400154"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-06-07T14:17:00Z"
+finished-at = "2026-06-07T14:19:20Z"
+duration-secs = 140
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-124-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = true
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+peak-rss-bytes = 2981654528
+device = "cpu"
+
+[ivf]
+n-centroids = 317
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = false
+build-duration-secs = 22.404193153
+cluster-count = 317
+m-total = 100000
+
+[memory]
+cpu-minor-faults = 925522
+cpu-major-faults = 0
+
+[scheme-config]
+delta = 0.5
+epsilon = 0.5
+key-seed = "42*32"
+lambda-prime = 3
+max-iter = 25
+mu = 0.03125
+n = 1024
+n-1 = 512
+n-centroids = 317
+nprobe-values = [32]
+params = "Sec128"
+quantisation-q = 1048576
+quantisation-q-bits = 20
+scheme = "bntm-ivf"
+train-seed = 42
+trapdoor = "option-b-placeholder-hl-s"
+upload-seed = 7
+verification-enabled = false
+
+[dataset]
+path = "data/msmarco"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 100000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

@@ -1,0 +1,97 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    % Plan 17 figure 11. Same axes as figure 02 (recall vs QPS,
+    % log-x), but each scheme contributes two lines: CPU solid and
+    % GPU dashed of the same colour. \tiptoe is dotted because its
+    % GPU number is the analytical proxy only (ADR 008 §6).
+    xlabel={Throughput (queries/s)},
+    ylabel={Recall@$k$},
+    xmode=log,
+    ymin=0, ymax=1,
+    every axis plot/.append style={
+      smooth,
+      error bars/x dir=both,
+      error bars/x explicit,
+    },
+    legend columns=3,
+    % `unbounded coords=jump` lets pgfplots tolerate `nan` cells when
+    % a scheme is measured on only one substrate (the emitter writes
+    % `nan` for the missing column).
+    unbounded coords=jump,
+    cycle list name=Set1,
+  ]
+    % \plaintext: CPU solid, GPU dashed of the same colour. Cycling
+    % the colour list per pair (cycle list shift=1 across the
+    % subsequent solid/dashed sets) keeps each scheme's CPU/GPU
+    % share a single colour entry. The shared-colour pattern is
+    % expressed by repeating the cycle: pgfplots advances the
+    % cycle on each \addplot, so we use \pgfplotsset{cycle list shift}
+    % implicitly via the order of legend entries — `\plaintext (CPU)`
+    % and `\plaintext (GPU)` are entries 0 and 1, but the colour
+    % the eye reads is the same because we set `mark=none` on GPU
+    % lines and rely on `dashed` to disambiguate.
+    \IfFileExists{\datadir/recall-throughput-cpu-vs-gpu-plaintext.tsv}{
+      \addplot+[mark=*] table[col sep=tab, x=qps_cpu, x error=qps_cpu_rep_ci95,
+                              y=recall_mean_cpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-plaintext.tsv};
+      \addlegendentry{\plaintext CPU}
+      \addplot+[mark=*, dashed] table[col sep=tab, x=qps_gpu,
+                                       x error=qps_gpu_rep_ci95,
+                                       y=recall_mean_gpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-plaintext.tsv};
+      \addlegendentry{\plaintext GPU}
+    }{}
+    \IfFileExists{\datadir/recall-throughput-cpu-vs-gpu-sap-ivf-nprobe.tsv}{
+      \addplot+[mark=square*] table[col sep=tab, x=qps_cpu,
+                                     x error=qps_cpu_rep_ci95,
+                                     y=recall_mean_cpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-sap-ivf-nprobe.tsv};
+      \addlegendentry{\sap+IVF CPU}
+      \addplot+[mark=square*, dashed] table[col sep=tab, x=qps_gpu,
+                                             x error=qps_gpu_rep_ci95,
+                                             y=recall_mean_gpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-sap-ivf-nprobe.tsv};
+      \addlegendentry{\sap+IVF GPU}
+    }{}
+    \IfFileExists{\datadir/recall-throughput-cpu-vs-gpu-emvp-ivf-nprobe.tsv}{
+      \addplot+[mark=triangle*] table[col sep=tab, x=qps_cpu,
+                                       x error=qps_cpu_rep_ci95,
+                                       y=recall_mean_cpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-emvp-ivf-nprobe.tsv};
+      \addlegendentry{\emvp+IVF CPU}
+      \addplot+[mark=triangle*, dashed] table[col sep=tab, x=qps_gpu,
+                                               x error=qps_gpu_rep_ci95,
+                                               y=recall_mean_gpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-emvp-ivf-nprobe.tsv};
+      \addlegendentry{\emvp+IVF GPU}
+    }{}
+    \IfFileExists{\datadir/recall-throughput-cpu-vs-gpu-bntm-ivf-nprobe.tsv}{
+      \addplot+[mark=diamond*] table[col sep=tab, x=qps_cpu,
+                                      x error=qps_cpu_rep_ci95,
+                                      y=recall_mean_cpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-bntm-ivf-nprobe.tsv};
+      \addlegendentry{\bntm+IVF CPU}
+      \addplot+[mark=diamond*, dashed] table[col sep=tab, x=qps_gpu,
+                                              x error=qps_gpu_rep_ci95,
+                                              y=recall_mean_gpu]
+        {\datadir/recall-throughput-cpu-vs-gpu-bntm-ivf-nprobe.tsv};
+      \addlegendentry{\bntm+IVF GPU}
+    }{}
+    % \tiptoe-GPU is the analytical proxy only (ADR 008 §6) — no
+    % measured GPU line. The CPU line is what the existing figure 02
+    % already shows; we omit the dotted-GPU projection from this
+    % chart and let figure 12 (effective bytes) carry the proxy.
+    \IfFileExists{\datadir/recall-throughput-tiptoe.tsv}{
+      \addplot+[mark=o, densely dotted] table[col sep=tab, x=qps,
+                                                x error=qps_rep_ci95,
+                                                y=recall_mean]
+        {\datadir/recall-throughput-tiptoe.tsv};
+      \addlegendentry{\tiptoe CPU}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

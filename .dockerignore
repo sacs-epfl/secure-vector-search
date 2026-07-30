@@ -1,0 +1,19 @@
+.git/
+.github/
+.claude/
+target/
+venv/
+data/
+results/
+analysis/figures/output/
+tmp/
+docs/
+# Re-include the conda env spec — deploy/Dockerfile COPYs it for the
+# micromamba layer (cuvs / RAPIDS toolchain bake-in). Everything else
+# under docs/ stays excluded (plans/, decisions/, etc. are operator
+# context, not build context).
+!docs/envs/rapids.yml
+*.pdf
+*.bin
+*.fvecs
+*.ivecs

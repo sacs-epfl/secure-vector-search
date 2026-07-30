@@ -1,0 +1,14 @@
+Three panels grouped by communication shape, sharing a single
+log-scale y-axis so bar heights are directly comparable across
+panels. \textsf{Online-only} (left): plaintext / \sap carry only the
+latency-critical round-trip --- query~$\uparrow$ and
+response~$\downarrow$, no setup or offline traffic. \textsf{With
+one-time setup} (middle): the cryptographic schemes that encrypt
+the corpus matrix once at upload time pay an $m \times n$ Setup
+cost (the green bar), amortised across every subsequent query.
+\textsf{With per-query offline traffic} (right): \tiptoe's BFV
+query token (Offline~$\uparrow$, $\sim$32\,MB/query) and the
+matching apply-hint download (Offline~$\downarrow$) are paid
+\emph{per query} on every request and don't amortise --- the
+structural reason fully-cryptographic schemes haven't yet hit
+deployment budgets.

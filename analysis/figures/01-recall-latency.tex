@@ -1,0 +1,50 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    % Recall on the y-axis (the dependent variable we care about);
+    % latency on the log-x axis as the operating-point parameter.
+    % Reads "at this latency budget, what recall do I get?" directly.
+    xlabel={Mean latency (ms)},
+    ylabel={Recall@$k$},
+    xmode=log,
+    ymin=0, ymax=1,
+    every axis plot/.append style={
+      smooth,
+      error bars/x dir=both,
+      error bars/x explicit,
+    },
+    % 7-entry single-row legend overflows the report's 0.74\linewidth
+    % minipage and bleeds into the parameter sidebar; wrap to 3 cols.
+    legend columns=3,
+  ]
+    \IfFileExists{\datadir/recall-latency-plaintext.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/recall-latency-plaintext.tsv};
+      \addlegendentry{\plaintext+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-latency-sap-ivf-nprobe.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/recall-latency-sap-ivf-nprobe.tsv};
+      \addlegendentry{\sap+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-latency-emvp-ivf-nprobe.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/recall-latency-emvp-ivf-nprobe.tsv};
+      \addlegendentry{\emvp+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-latency-bntm-ivf-nprobe.tsv}{
+      \addplot table[col sep=tab, x=latency_ms_mean, x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/recall-latency-bntm-ivf-nprobe.tsv};
+      \addlegendentry{\bntm+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-latency-tiptoe.tsv}{
+      \addplot+[densely dotted] table[col sep=tab, x=latency_ms_mean, x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/recall-latency-tiptoe.tsv};
+      \addlegendentry{\tiptoe}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

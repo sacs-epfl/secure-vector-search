@@ -1,0 +1,58 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % \bntm+IVF per-query time breakdown stacked per state (off / on).
+  % The flat \bntm panel was dropped: with sap-flat / emvp-flat / bntm-flat
+  % out of the paper, only the \bntm+IVF column remains, and a 1-panel
+  % bar chart reads cleaner than a 2-panel groupplot.
+  %
+  % Three segments per bar:
+  %   * compute       : server-side scoring work, equal on both bars by
+  %                     construction (off-side aggregation is restricted to
+  %                     the on-side's nprobe set in preprocess.py).
+  %   * verify        : Protocol 2 (iterated Freivalds, λ' = 3) cost —
+  %                     the headline price of malicious-server detection.
+  %   * side-effects  : compute_on - latency_off — overhead of the
+  %                     verify-on code path that lands outside the
+  %                     explicit verify segment (rng path, branch-prediction
+  %                     differences, cache pollution).
+  \begin{axis}[
+    ybar stacked,
+    cycle list={%
+      {fill=Paired-A, fill opacity=0.85, draw=Paired-A},
+      {fill=Paired-B, fill opacity=0.85, draw=Paired-B},
+      {fill=Paired-C, fill opacity=0.85, draw=Paired-C}%
+    },
+    xtick=data,
+    x tick label style={rotate=20, anchor=north east, font=\sffamily\footnotesize},
+    bar width=14pt,
+    enlarge x limits=0.6,
+    width=3.0in,
+    height=2.2in,
+    legend columns=-1,
+    legend style={font=\sffamily\footnotesize, at={(0.5,1.02)}, anchor=south},
+    ylabel={Mean per-query time (ms)},
+    every axis plot/.append style={fill, fill opacity=0.85},
+  ]
+    \IfFileExists{\datadir/bntm-verification-summary-bntm-ivf.tsv}{%
+      \pgfplotstableread[col sep=tab]
+        {\datadir/bntm-verification-summary-bntm-ivf.tsv}\bntmIvfSummary
+      \pgfplotsset{xticklabels from table={\bntmIvfSummary}{label}}
+      % compute_us already includes side_effects_us (see preprocess.py
+      % write_bntm docstring), so subtract it here — otherwise the on-bar
+      % double-counts side_effects and inflates ~52%. Matches privacy-knobs.tex.
+      \addplot+ table[x expr=\coordindex,
+                       y expr={(\thisrow{compute_us} - \thisrow{side_effects_us})/1000}]{\bntmIvfSummary};
+      \addlegendentry{compute}
+      \addplot+ table[x expr=\coordindex,
+                       y expr={\thisrow{verify_segment_us}/1000}]{\bntmIvfSummary};
+      \addlegendentry{verify}
+      \addplot+ table[x expr=\coordindex,
+                       y expr={\thisrow{side_effects_us}/1000}]{\bntmIvfSummary};
+      \addlegendentry{side-effects}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

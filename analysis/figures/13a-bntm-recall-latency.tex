@@ -1,0 +1,67 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % Recall vs latency, \bntm vs \bntm+IVF, verification on vs off.
+  % Each (scheme, state) gets its own Dark2 slot so every visible
+  % curve is a different colour: \bntm off=A, on=B; \bntm+IVF off=C,
+  % on=D. Line style still tracks state (solid=off, dashed=on) and
+  % marker still tracks scheme (round=flat, square=IVF) — that
+  % redundancy means the figure stays readable in greyscale and on
+  % machines where one scheme is absent (the single-row guard hides
+  % \bntm for d81ba182, leaving only the two \bntm+IVF curves which
+  % now still render in distinct colours C/D).
+  \pgfplotsset{
+    /pgfplots/state-on/.style  = {densely dashed, very thick},
+    /pgfplots/state-off/.style = {solid,          very thick},
+    /pgfplots/scheme-bntm-off/.style     = {color=Dark2-A, mark=*},
+    /pgfplots/scheme-bntm-on/.style      = {color=Dark2-B, mark=*},
+    /pgfplots/scheme-bntm-ivf-off/.style = {color=Dark2-C, mark=square*},
+    /pgfplots/scheme-bntm-ivf-on/.style  = {color=Dark2-D, mark=square*},
+  }
+  \begin{axis}[
+    width=3.25in,
+    height=2.4in,
+    xlabel={Mean latency (ms)},
+    ylabel={Recall@$k$},
+    xmode=log,
+    ymin=0, ymax=1.05,
+    legend columns=2,
+    legend style={font=\sffamily\footnotesize},
+  ]
+    \IfFileExists{\datadir/bntm-verification-recall-latency-bntm-off.tsv}{%
+      \addplot+[scheme-bntm-off, state-off, only marks,
+                error bars/x dir=both, error bars/x explicit,
+      ] table[col sep=tab, x=latency_ms_mean,
+              x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/bntm-verification-recall-latency-bntm-off.tsv};
+      \addlegendentry{\bntm (off)}
+    }{}
+    \IfFileExists{\datadir/bntm-verification-recall-latency-bntm-on.tsv}{%
+      \addplot+[scheme-bntm-on, state-on, only marks,
+                error bars/x dir=both, error bars/x explicit,
+      ] table[col sep=tab, x=latency_ms_mean,
+              x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/bntm-verification-recall-latency-bntm-on.tsv};
+      \addlegendentry{\bntm (on)}
+    }{}
+    \IfFileExists{\datadir/bntm-verification-recall-latency-bntm-ivf-off.tsv}{%
+      \addplot+[scheme-bntm-ivf-off, state-off,
+                error bars/x dir=both, error bars/x explicit,
+      ] table[col sep=tab, x=latency_ms_mean,
+              x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/bntm-verification-recall-latency-bntm-ivf-off.tsv};
+      \addlegendentry{\bntm+IVF (off)}
+    }{}
+    \IfFileExists{\datadir/bntm-verification-recall-latency-bntm-ivf-on.tsv}{%
+      \addplot+[scheme-bntm-ivf-on, state-on,
+                error bars/x dir=both, error bars/x explicit,
+      ] table[col sep=tab, x=latency_ms_mean,
+              x error=latency_ms_rep_ci95, y=recall_mean]
+        {\datadir/bntm-verification-recall-latency-bntm-ivf-on.tsv};
+      \addlegendentry{\bntm+IVF (on)}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

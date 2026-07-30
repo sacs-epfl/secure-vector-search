@@ -1,0 +1,32 @@
+The visible jump at $N{=}16$ is the cost of leaving socket~0 on
+sacs006's dual-socket Xeon Gold 6426Y. The harness records two
+operating points at that thread count by design (Plan~13's binding
+pair): \texttt{physcpubind=0-15,\,membind=0} keeps rayon's pool
+inside one socket, \texttt{numactl-binding=none} lets it span both.
+The 16-thread comparison is therefore apples-to-apples on
+parallelism width; the gap is purely the remote-memory traffic the
+unpinned binding incurs.
+
+Per-scheme ratio of unpinned~/~pinned at $N{=}16$:
+
+\begin{itemize}\setlength{\itemsep}{0pt}
+  \item plaintext:  $3.21 \to 4.36$~ms  ($1.36\times$, $+1.2$~ms absolute)
+  \item SAP+IVF:    $3.03 \to 4.39$~ms  ($1.45\times$, $+1.4$~ms)
+  \item EMVP+IVF:  $10.28 \to 14.93$~ms ($1.45\times$, $+4.7$~ms)
+  \item BN+IVF:   $167.3 \to 427.2$~ms  ($2.55\times$, $+260$~ms)
+\end{itemize}
+
+The relative cost scales with how much per-query work happens.
+Schemes whose hot path is $L_2$-cache-resident (plaintext, SAP+IVF,
+EMVP+IVF probe a few clusters of $\approx\!315$ vectors each) pay
+the cross-socket fixed cost roughly once per query; BN+IVF's
+per-cluster matvec is wider ($n{=}1024$ encrypted field elements
+times the probed cluster size, plus per-query verification trials)
+so the cross-socket traffic compounds across the inner loop and
+dominates the wall-clock.
+
+The takeaway is operational, not algorithmic: any unattended sweep
+on sacs006 that doesn't pin to one socket pays the cross-NUMA tax
+quietly. \texttt{make eval-scaling-no-tiptoe} captures the cost
+explicitly; \texttt{make eval} at default settings (rayon picks 64
+threads, cross-socket) sits at the unpinned end of every curve.

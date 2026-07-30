@@ -1,0 +1,17 @@
+# Embedding-stack versions are PINNED (==), not floating (>=), as of
+# 2026-06-09. The corpus embedding is fp32 GPU matmul and is NOT
+# bit-reproducible across torch/cuBLAS/cuDNN versions — floating-point
+# non-associativity + kernel selection drift the output. These are the
+# exact versions baked into the deploy/Dockerfile `svs:local` image that
+# produced the canonical 8.8M corpus (see data/msmarco-full/CHECKSUMS.txt).
+# Bump them only alongside a deliberate corpus re-baseline + new CHECKSUMS.
+sentence-transformers==5.5.1
+torch==2.12.0
+transformers==5.10.2
+tokenizers==0.22.2
+safetensors==0.7.0
+numpy==2.2.6
+# Non-embedding tooling — kept floating; not corpus-determining.
+tqdm>=4.0
+pandas>=2.0
+tomli>=2.0; python_version < "3.11"

@@ -1,0 +1,47 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    % Plan 17 / ADR 008 § 4 figure 12: recall vs the analytical
+    % `effective_bytes_per_query` proxy. Hardware-agnostic — captures
+    % the matrix the kernel streams across per query (not wire bytes),
+    % so it predicts GPU bandwidth-bound throughput without needing a
+    % GPU run. \tiptoe's ~4× bandwidth penalty (16-bit → 64-bit
+    % elements) shows up cleanly on the log-x axis.
+    xlabel={Effective bytes / query},
+    ylabel={Recall@$k$},
+    xmode=log,
+    ymin=0, ymax=1,
+    every axis plot/.append style={smooth},
+    legend columns=3,
+  ]
+    \IfFileExists{\datadir/recall-effective-bytes-plaintext.tsv}{
+      \addplot table[col sep=tab, x=eff_bytes_mean, y=recall_mean]
+        {\datadir/recall-effective-bytes-plaintext.tsv};
+      \addlegendentry{\plaintext}
+    }{}
+    \IfFileExists{\datadir/recall-effective-bytes-sap-ivf-nprobe.tsv}{
+      \addplot table[col sep=tab, x=eff_bytes_mean, y=recall_mean]
+        {\datadir/recall-effective-bytes-sap-ivf-nprobe.tsv};
+      \addlegendentry{\sap+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-effective-bytes-emvp-ivf-nprobe.tsv}{
+      \addplot table[col sep=tab, x=eff_bytes_mean, y=recall_mean]
+        {\datadir/recall-effective-bytes-emvp-ivf-nprobe.tsv};
+      \addlegendentry{\emvp+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-effective-bytes-bntm-ivf-nprobe.tsv}{
+      \addplot table[col sep=tab, x=eff_bytes_mean, y=recall_mean]
+        {\datadir/recall-effective-bytes-bntm-ivf-nprobe.tsv};
+      \addlegendentry{\bntm+IVF}
+    }{}
+    \IfFileExists{\datadir/recall-effective-bytes-tiptoe.tsv}{
+      \addplot+[densely dotted] table[col sep=tab, x=eff_bytes_mean, y=recall_mean]
+        {\datadir/recall-effective-bytes-tiptoe.tsv};
+      \addlegendentry{\tiptoe (proxy)}
+    }{}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

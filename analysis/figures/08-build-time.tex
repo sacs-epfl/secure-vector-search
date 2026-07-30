@@ -1,0 +1,88 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % Plan 14 § Figure 08: cold-build time per scheme. Source TSV is
+  % filtered to BuildOutcome.cache_hit = false at preprocess time, so
+  % every bar reflects an actual encryption/index pipeline run rather
+  % than a microsecond-scale warm-cache hit. Caption should call out
+  % the cache-hit filter and that warm runs are sub-millisecond.
+  \IfFileExists{\datadir/build-time-summary.tsv}{%
+    \pgfplotstableread[col sep=tab]{\datadir/build-time-summary.tsv}\rawbuildtable
+    % Sort ascending by cold build time so the bars climb from
+    % cheapest (sap, sub-second) to most expensive (tiptoe, ~40 min);
+    % rank is then immediately readable from the y-axis order
+    % without scanning bar lengths.
+    \pgfplotstablesort[sort key=build_duration_secs, sort cmp=float <]
+      \buildtable\rawbuildtable
+    % Height scales with the number of bars so the figure resizes
+    % cleanly for fleets with more / fewer schemes. Constants tuned
+    % so adjacent bars sit ~12pt apart at default bar width=10pt.
+    \pgfplotstablegetrowsof{\buildtable}
+    \pgfmathsetmacro{\nbars}{\pgfplotsretval}
+    \pgfmathsetmacro{\figheight}{0.6 + 0.22 * \nbars}
+    \begin{axis}[
+      height=\figheight in,
+      bar cycle list/.style={cycle list/Paired-12},
+      xbar,
+      % Horizontal bars: each scheme gets its own row at full
+      % readable height, the log axis spreads across the full
+      % figure width, and the per-scheme labels need no rotation.
+      % ybar with 8 schemes crowded into ~3.25in collapsed all
+      % bars visually together.
+      every axis plot/.append style={fill, fill opacity=0.85},
+      bar width=10pt,
+      ytick=data,
+      yticklabels from table={\buildtable}{scheme},
+      ylabel={Scheme},
+      xlabel={Cold build time (s, log scale)},
+      xmode=log,
+      log origin=infty,
+      enlarge y limits=0.10,
+      % Explicit xmin a decade below the cheapest scheme (sap at
+      % ~0.24s) so its bar has width — `log origin=infty` + auto xmin
+      % otherwise pinned xmin to sap's own value and rendered it as
+      % zero-width.
+      xmin=0.1,
+      % Explicit xmax leaves enough clear space after tiptoe's bar
+      % tip (~2.5e3) for the east-anchored value label (~50pt wide
+      % on the printout). `enlarge x limits=…` alone was unreliable
+      % here because its fraction-of-log-range semantics interact
+      % awkwardly with the fixed xmin.
+      xmax=50000,
+      % style.tex sets `ymajorgrids=true` globally (helpful on line
+      % plots); on this xbar chart the horizontal grid lines run
+      % through every scheme row and just add visual noise — disable.
+      % Keep `xmajorgrids` so the log-scale reference lines stay.
+      ymajorgrids=false,
+      xmajorgrids=true,
+      nodes near coords={\pgfmathprintnumber\pgfplotspointmeta},
+      % point meta=explicit + meta=<col> forces the label to read
+      % the raw build_duration_secs cell rather than the
+      % log-transformed x coordinate (which is why "tiptoe" was
+      % labelled 7.84 = ln(2547.55) before).
+      % `anchor=west` keeps the digits east of each bar — pgfplots'
+      % default for xbar puts them at the bar end with the text
+      % centred on the coord, which can sit on top of the bar tip.
+      nodes near coords align={horizontal},
+      every node near coord/.append style={
+        anchor=west,
+        font=\sffamily\footnotesize,
+        text=black,
+        /pgf/number format/precision=2,
+        /pgf/number format/fixed,
+      },
+    ]
+      \addplot+[point meta=explicit] table[
+        y expr=\coordindex,
+        x=build_duration_secs,
+        meta=build_duration_secs,
+      ]{\buildtable};
+    \end{axis}
+  }{%
+    \node {no build-time data: rerun with \texttt{--no-cache} so
+      \texttt{[index].cache-hit = false}};
+  }%
+\end{tikzpicture}
+\end{document}

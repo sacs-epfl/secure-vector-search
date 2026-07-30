@@ -1,0 +1,51 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  % Plan 14 § Figure 09b: per-query substep breakdown, normalised to
+  % 100% per scheme. Reveals composition within each scheme — useful
+  % for comparing where the protocol spends its time, independent of
+  % absolute scale (figure 09a covers that). Caption should
+  % cross-reference 09a so readers can flip between magnitude and
+  % proportion.
+  \IfFileExists{\datadir/substep-breakdown-normalised.tsv}{%
+    \pgfplotstableread[col sep=tab]{\datadir/substep-breakdown-normalised.tsv}\substable
+    \begin{axis}[
+      bar cycle list/.style={cycle list/Paired-12},
+      xbar stacked,
+      every axis plot/.append style={fill, fill opacity=0.9},
+      bar width=10pt,
+      width=4in, height=2.4in,
+      ytick=data,
+      yticklabels from table={\substable}{scheme},
+      y tick label style={font=\sffamily\footnotesize},
+      x tick label style={font=\sffamily\footnotesize},
+      xlabel={Fraction of per-query time},
+      xlabel style={font=\sffamily\footnotesize},
+      xmin=0, xmax=1,
+      xtick={0,0.2,0.4,0.6,0.8,1},
+      enlarge y limits=0.12,
+      legend style={at={(0.5,1.02)}, anchor=south, draw=none, font=\sffamily\footnotesize},
+      legend columns=-1,
+    ]
+      \addplot+ table[y expr=\coordindex, x=route]{\substable};
+      \addlegendentry{route}
+      \addplot+ table[y expr=\coordindex, x=encode]{\substable};
+      \addlegendentry{encode}
+      \addplot+ table[y expr=\coordindex, x=server_compute]{\substable};
+      \addlegendentry{server-compute}
+      \addplot+ table[y expr=\coordindex, x=verify]{\substable};
+      \addlegendentry{verify}
+      \addplot+ table[y expr=\coordindex, x=decompress]{\substable};
+      \addlegendentry{decompress}
+      \addplot+ table[y expr=\coordindex, x=decode]{\substable};
+      \addlegendentry{decode}
+      \addplot+ table[y expr=\coordindex, x=merge]{\substable};
+      \addlegendentry{merge}
+    \end{axis}
+  }{%
+    \node {no substep-breakdown data: rerun with \texttt{--breakdown}};
+  }%
+\end{tikzpicture}
+\end{document}

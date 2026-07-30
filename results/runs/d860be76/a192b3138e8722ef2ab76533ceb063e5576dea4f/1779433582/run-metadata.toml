@@ -1,0 +1,46 @@
+run-id = "1779433582"
+machine-id = "d860be76"
+git-sha = "a192b3138e8722ef2ab76533ceb063e5576dea4f"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-05-22T07:06:22Z"
+status = "partial"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-111-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+device = "gpu"
+
+[ivf]
+n-centroids = 2967
+train-seed = 42
+max-iter = 25
+
+[gpu]
+sku = "rtx-5000-ada"
+location = "local"
+memory-bytes = 34351349760
+
+[scheme-config]
+max-iter = 25
+n-centroids = 2967
+nprobe-values = [1, 8, 64, 256, 1024, 2967]
+scheme = "plaintext"
+train-seed = 42
+
+[dataset]
+path = "data/msmarco-full"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 8800000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

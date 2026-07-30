@@ -1,0 +1,5 @@
+started-at,machine-id,cpu-model,cores,ram-bytes,gpu-name,device,model,corpus,n,batch-size,elapsed-secs,is-resumed
+2026-05-17T12:59:42Z,d860be76,Intel(R) Xeon(R) Gold 6426Y,64,134820773888,NVIDIA RTX 5000 Ada Generation,cuda,intfloat/e5-base-v2,passages,8800000,256,78671.618,false
+2026-05-18T10:51:26Z,d860be76,Intel(R) Xeon(R) Gold 6426Y,64,134820773888,NVIDIA RTX 5000 Ada Generation,cuda,intfloat/e5-base-v2,queries,1000,256,0.281,false
+2026-06-08T13:20:12Z,88e8ef71,Intel(R) Xeon(R) Gold 6426Y,64,134820757504,NVIDIA RTX 5000 Ada Generation,cuda,intfloat/e5-base-v2,passages,8800000,256,65634.871,false
+2026-06-09T07:34:32Z,88e8ef71,Intel(R) Xeon(R) Gold 6426Y,64,134820757504,NVIDIA RTX 5000 Ada Generation,cuda,intfloat/e5-base-v2,queries,1000,256,0.356,false

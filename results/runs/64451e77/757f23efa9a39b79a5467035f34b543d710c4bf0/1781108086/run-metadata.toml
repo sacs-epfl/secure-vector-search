@@ -1,0 +1,97 @@
+run-id = "1781108086"
+machine-id = "64451e77"
+git-sha = "757f23efa9a39b79a5467035f34b543d710c4bf0"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-06-10T16:14:46Z"
+finished-at = "2026-06-11T00:54:23Z"
+duration-secs = 31177
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-124-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+cgroup-memory-bytes = 134217728000
+peak-rss-bytes = 129587601408
+device = "gpu"
+
+[campaign]
+id = "w4-msmarco-full-gpu-20260610-rerun"
+title = "Plan 27 8.8M GPU emvp/bntm re-run after VRAM-leak fix (757f23e)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/64451e77/1781108086"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "5850d1814ca7160e8bd226571c8535b8d8588849dc708c75c49cd5b71833e936"
+  bytes  = 1661291
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "289f859fdf98da090da4c6547bb189f39da5c793f147ceb3759f7c9c7cd5267e"
+  bytes  = 1744839
+
+[ivf]
+n-centroids = 2967
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 77.230092275
+cluster-count = 2967
+m-total = 8800000
+
+[gpu]
+sku = "rtx-5000-ada"
+location = "local"
+memory-bytes = 34351349760
+vram-budget-bytes = 30064771072
+peak-vram-bytes = 34041430016
+
+[memory]
+cpu-minor-faults = 509549260
+cpu-major-faults = 1362560
+gpu-get-count = 3948000
+gpu-upload-count = 679585
+gpu-eviction-count = 677334
+gpu-bytes-uploaded-total = 34464197443584
+
+[scheme-config]
+delta = 0.5
+epsilon = 0.5
+key-seed = "42*32"
+lambda-prime = 3
+max-iter = 25
+mu = 0.03125
+n = 1024
+n-1 = 512
+n-centroids = 2967
+nprobe-values = [1, 8, 64, 256]
+params = "Sec128"
+quantisation-q = 1048576
+quantisation-q-bits = 20
+scheme = "bntm-ivf"
+train-seed = 42
+trapdoor = "option-b-placeholder-hl-s"
+upload-seed = 7
+verification-enabled = false
+
+[dataset]
+path = "/mnt/data/rpereira/svs-data/msmarco-full"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 8800000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

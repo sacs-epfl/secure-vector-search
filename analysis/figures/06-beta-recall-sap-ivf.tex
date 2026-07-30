@@ -1,0 +1,35 @@
+\documentclass{standalone}
+\input{../style}
+\providecommand{\datadir}{../data}
+\begin{document}
+\begin{tikzpicture}
+  \IfFileExists{\datadir/beta-recall-sap-ivf.tsv}{%
+    \pgfplotstableread[col sep=tab]{\datadir/beta-recall-sap-ivf.tsv}\sapivftable
+    \begin{axis}[
+      xlabel={$\beta$ (perturbation)},
+      ylabel={Recall@$k$},
+      % Slightly above 1.0 so the plaintext-IVF ceiling line at y=1
+      % isn't drawn ON the frame (invisible).
+      ymin=0, ymax=1.03,
+      every axis plot/.append style={smooth},
+    ]
+      \addplot+[
+        error bars/.cd,
+        y dir=both, y explicit,
+      ] table[
+        col sep=tab,
+        x=beta,
+        y=recall_mean,
+        y error=recall_ci95,
+      ]{\sapivftable};
+      \addlegendentry{\sap+IVF recall@$k$}
+
+      \addplot+[no marks]
+        table[col sep=tab, x=beta, y=plaintext_ref]{\sapivftable};
+      \addlegendentry{\plaintext+IVF ceiling}
+    \end{axis}
+  }{%
+    \begin{axis}[title={no data}]\end{axis}
+  }%
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,83 @@
+run-id = "1781146599"
+machine-id = "64451e77"
+git-sha = "ae1d564091b154261245b2dd73b9e30ffd0d581e"
+git-dirty = true
+git-branch = "main"
+started-at = "2026-06-11T02:56:39Z"
+finished-at = "2026-06-11T04:35:04Z"
+duration-secs = 5905
+status = "complete"
+harness-version = "0.1.0"
+rust-toolchain = "rustc 1.95.0 (59807616e 2026-04-14)"
+target-features = ["sse2"]
+kernel-version = "6.8.0-124-generic"
+cpu-governor = "performance"
+notes = ""
+no-cache = false
+breakdown = false
+parallel-threads = 64
+numactl-binding = "none"
+batch-sizes = [1]
+cgroup-memory-bytes = 134217728000
+peak-rss-bytes = 130282483712
+device = "cpu"
+
+[campaign]
+id = "w4-msmarco-full-cpu-20260611"
+title = "Plan 27 8.8M CPU sweeps (2026-06-09 corpus baseline)"
+
+[bulk]
+uri       = "rcp-scratch:///mnt/sacs/scratch/shared/secure-vsearch/bulk-store/64451e77/1781146599"
+retention = "60d"
+
+  [[bulk.files]]
+  name   = "raw.csv"
+  sha256 = "df695954770e5a86445aaf3e54abbea35fec3de28fc11d08605f9b0b06b6537e"
+  bytes  = 2151134
+
+  [[bulk.files]]
+  name   = "top_k.csv"
+  sha256 = "27036d2327be06164d8463e18678f2c56fca9e0a025b45e9a262b92bb0b9a0e4"
+  bytes  = 1648939
+
+[ivf]
+n-centroids = 2967
+train-seed = 42
+max-iter = 25
+
+[index]
+cache-hit = true
+build-duration-secs = 27.636795918
+cluster-count = 2967
+m-total = 8800000
+
+[memory]
+cpu-minor-faults = 203182764
+cpu-major-faults = 30690839
+
+[scheme-config]
+b = 17
+ell0 = 1024
+k = 268
+key-seed = "42*32"
+max-iter = 25
+n = 1292
+n-centroids = 2967
+nprobe-values = [1, 8, 64, 256, 1024]
+params = "Sec128"
+quantisation-q = 1048576
+s = 76
+scheme = "emvp-ivf"
+train-seed = 42
+trapdoor = "option-b-placeholder-r"
+upload-seed = 7
+
+[dataset]
+path = "/mnt/data/rpereira/svs-data/msmarco-full"
+corpus-file = "passages.fvecs"
+query-file = "queries.fvecs"
+ground-truth = "ground_truth.ivecs"
+n-passages = 8800000
+n-queries = 1000
+embedding-model = "intfloat/e5-base-v2"
+dimension = 768

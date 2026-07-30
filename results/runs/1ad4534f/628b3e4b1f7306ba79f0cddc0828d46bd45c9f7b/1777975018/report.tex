@@ -1,0 +1,88 @@
+\documentclass[a4paper]{article}
+        \RequirePackage[T1]{fontenc}
+        \RequirePackage[tt=false, type1=true]{libertine}
+        \RequirePackage[varqu]{zi4}
+        \RequirePackage[libertine]{newtxmath}
+        \usepackage{graphicx}
+        \usepackage{booktabs}
+        \usepackage{geometry}
+        \usepackage[hidelinks]{hyperref}
+        \geometry{margin=2.5cm}
+
+        \title{\textbf{Evaluation Report}\\[0.4em]
+                \large Run 1777975018\quad Scheme: sap-ivf (beta sweep)}
+        \author{Secure Vector Search}
+        \date{Generated: 2026-05-05 10:58:55 UTC}
+
+        \begin{document}
+        \maketitle\thispagestyle{empty}
+
+        \section*{Run metadata}
+        \begin{tabular}{@{}ll@{}}
+          \toprule
+          \textbf{Field} & \textbf{Value} \\
+          \midrule
+          Run ID          & \texttt{1777975018} \\
+          Status          & complete \\
+          Git             & \texttt{628b3e4b1f73 (main) [dirty]} \\
+          Machine         & \texttt{1ad4534f (laptop)} \\
+          CPU             & Apple M4 Pro \\
+          Cores / RAM     & 12 cores / 48.0\,GB \\
+          GPU             & none \\
+          Scheme          & sap-ivf (beta sweep) \\
+          Centroids       & 317 \\
+          Dataset         & \texttt{data/msmarco} \\
+          Corpus / queries & 100000 passages, 1000 queries, dim=768 \\
+          Eval started    & 2026-05-05T09:56:58Z \\
+          Eval finished   & 2026-05-05T10:00:34Z \\
+          Duration        & 216\,s \\
+          Rust toolchain  & \texttt{rustc 1.95.0 (59807616e 2026-04-14)} \\
+          Report built    & 2026-05-05 10:58:55 UTC \\
+          \bottomrule
+        \end{tabular}
+
+        \newpage
+        \section{Quality}
+
+        \begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/628b3e4b1f7306ba79f0cddc0828d46bd45c9f7b/1777975018/plots/figures/05-beta-recall.pdf}
+  \caption{SAP recall@$k$ vs.\ perturbation level $\beta$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/628b3e4b1f7306ba79f0cddc0828d46bd45c9f7b/1777975018/plots/figures/06-beta-recall-sap-ivf.pdf}
+  \caption{SAP+IVF recall@$k$ vs.\ perturbation level $\beta$.}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/628b3e4b1f7306ba79f0cddc0828d46bd45c9f7b/1777975018/plots/figures/03-communication.pdf}
+  \caption{Communication volume per query (query + response bytes).}
+\end{figure}
+
+
+        \newpage
+        \section{Performance}
+
+        \begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/628b3e4b1f7306ba79f0cddc0828d46bd45c9f7b/1777975018/plots/figures/01-recall-latency.pdf}
+  \caption{Recall@$k$ vs.\ mean latency (log scale).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/628b3e4b1f7306ba79f0cddc0828d46bd45c9f7b/1777975018/plots/figures/02-recall-throughput.pdf}
+  \caption{Recall@$k$ vs.\ throughput (log scale).}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{/Users/rafaelpp/epfl/code/secure-vector-search/results/runs/1ad4534f/628b3e4b1f7306ba79f0cddc0828d46bd45c9f7b/1777975018/plots/figures/04-latency-cdf.pdf}
+  \caption{Latency CDF at the $\approx$90\% recall operating point.}
+\end{figure}
+
+
+        \end{document}
