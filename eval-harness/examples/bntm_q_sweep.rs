@@ -72,7 +72,7 @@ async fn main() -> anyhow::Result<()> {
 
     println!();
     println!(
-        "Plan 12 OQ §2 — BN+IVF Q-sweep at full probe (nprobe={n_centroids}, k={}, verification=off)",
+        "BN+IVF Q-sweep at full probe (nprobe={n_centroids}, k={}, verification=off)",
         cli.k
     );
     println!(

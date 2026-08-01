@@ -4,8 +4,7 @@ RESULTS := ../results
 AGG     := $(RESULTS)/aggregated
 # Local scratch — gitignored; preserved for ad-hoc preprocess
 # invocations against fresh raw CSVs that aren't yet under
-# $(AGG)/<m>/. The canonical TSV location is $(AGG)/<m>/ per
-# ADR 009 § 2.2 / Plan 22 W3.
+# $(AGG)/<m>/. The canonical TSV location is $(AGG)/<m>/.
 DATA    := data
 OUTPUT  := output
 

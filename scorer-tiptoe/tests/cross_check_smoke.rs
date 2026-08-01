@@ -78,7 +78,7 @@ async fn upload_and_score_produces_well_formed_hits() {
 async fn k_capped_at_routed_cluster_size() {
     // The routed cluster has at most `cluster_size` vectors; if the
     // caller asks for more, we return `cluster_size` per the
-    // CLAUDE.md scorer invariant.
+    // scorer invariant.
     let vectors = random_vectors(20, 8, 2);
     let scorer = TiptoeScorer::new();
     let (handle, _build) = scorer

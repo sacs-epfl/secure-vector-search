@@ -29,7 +29,7 @@ pub enum BnTmParams {
     /// Standard-LPN parameter set, λ = 128, δ = 0.125 (`n_1` = 128),
     /// ε = 0.7 (`μ` = 0.125).
     ///
-    /// δ retuned by Plan 28 from the original δ = 0.5 fallback. A fixed
+    /// δ retuned from the original δ = 0.5 fallback. A fixed
     /// δ = 0.5 defeats the trapdoor's own asymptotic point: paper §5
     /// (arXiv:2502.13060v3) states genuine client speedup needs
     /// δ = o(1), not a constant fraction of `n`.
@@ -47,7 +47,7 @@ pub enum BnTmParams {
     /// Same λ = 128 / `n` = 1024 / ε = 0.7 base as [`Self::Sec128`],
     /// with an explicit δ = 1 / 2^k for `k` in `1..=4`
     /// (δ ∈ {0.5, 0.25, 0.125, 0.0625}) — a sweep axis for exploring
-    /// the decode-latency / security-margin tradeoff (Plan 28).
+    /// the decode-latency / security-margin tradeoff.
     ///
     /// `k = 4` (δ = 0.0625) is the smallest value this crate accepts,
     /// and it is **not** "the conservative choice" just because it
@@ -123,7 +123,7 @@ impl BnTmParams {
     ///
     /// **Retune trigger:** prefer the smallest `k` (in `1..=4`) that
     /// shows a measured decode-latency improvement in the eval-harness
-    /// sweep, per Plan 28. Move *up* (larger δ, smaller `k`) only if a
+    /// sweep. Move *up* (larger δ, smaller `k`) only if a
     /// cryptanalytic result against standard LPN at our `(n, μ)`
     /// surfaces, or if the per-query online response at `nprobe = 32`
     /// exceeds 1 MiB (EMVP+IVF is *projected* at ~6 MiB, so 1 MiB is
@@ -143,15 +143,15 @@ impl BnTmParams {
     /// comment already named. ε = 0.7 gives μ = 1/8 = 0.125 — chosen
     /// so `μ` sits at parity with (not above) the default `Sec128`'s
     /// `δ = 0.125`, keeping the sparse `S`/`T` terms no more expensive
-    /// than the dominant dense `O(m·n_1)` decode terms Plan 28 relies
-    /// on, while quadrupling the `δ·μ` margin above the paper's §7
+    /// than the dominant dense `O(m·n_1)` decode terms the scorer
+    /// relies on, while quadrupling the `δ·μ` margin above the paper's §7
     /// floor at every δ in the `Sec128Delta` sweep (Sec128: 4× → 16×;
     /// k=4 / δ=0.0625, the sweep's weakest point: 2× → 8×).
     ///
     /// **Caveat, stated plainly:** these margin multiples are relative
     /// to the paper's asymptotic threshold, not a computed bit-security
     /// number — we still have no LPN-hardness estimator (`ν(δ,ε,λ)`'s
-    /// `ι` term, see `docs/notes/bntm-from-paper.md`) to say what
+    /// `ι` term) to say what
     /// concrete security this buys. Raise further if a sharper
     /// cryptanalytic estimate says 0.125 still isn't enough at n=1024.
     pub const fn epsilon(&self) -> f64 {

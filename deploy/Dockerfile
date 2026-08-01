@@ -63,7 +63,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Microsoft SEAL (pinned to 4.1.1, the version the Tiptoe Go reference's
-# underhood/rlwe expects per CLAUDE.md § scorer-tiptoe). Not in Ubuntu
+# underhood/rlwe expects). Not in Ubuntu
 # apt; build from source, install to /usr/local/{include,lib}. The Go
 # reference's `go build` step compiles `underhood/rlwe`'s C++ glue
 # which `#include`s `<seal/seal.h>` — without this the
@@ -164,14 +164,14 @@ RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements
 RUN pip3 install --no-cache-dir --upgrade 'cmake>=3.30.4'
 
 # RAPIDS / cuVS toolchain via micromamba (single-binary mamba).
-# `docs/envs/rapids.yml` is the source of truth — pins cuvs 26.04.00,
-# libcuvs-headers, cuda-cudart-dev, libclang, cmake 4.3.2, plus the
-# transitive RAPIDS + RAFT + RMM stack cuvs-sys's `find_package(cuvs)`
-# expects. Without this layer the `--features gpu` build of
-# scorer-plaintext / scorer-sap fails at CMake's
-# `cuvsConfig.cmake not found` step (the GPU pod's prior failure).
+# The conda env spec COPYd below is the source of truth — it pins
+# cuvs 26.04.00, libcuvs-headers, cuda-cudart-dev, libclang,
+# cmake 4.3.2, plus the transitive RAPIDS + RAFT + RMM stack
+# cuvs-sys's `find_package(cuvs)` expects. Without this layer the
+# `--features gpu` build of scorer-plaintext / scorer-sap fails at
+# CMake's `cuvsConfig.cmake not found` step.
 #
-# Env vars below mirror docs/envs/README.md verbatim so the
+# The env vars below mirror that env's activation so the
 # pod-runtime `cargo build --features gpu` inside `make eval-gpu-cloud`
 # picks up the conda-installed libcuvs without needing a manual
 # `conda activate rapids` step — pods never run an interactive shell.

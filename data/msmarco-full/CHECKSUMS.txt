@@ -13,9 +13,9 @@
 #    which was overwritten by an aborted re-embed and is unrecoverable. The
 #    embedding is NOT bit-reproducible across torch/cuBLAS versions, so these
 #    hashes differ from the old corpus. ALL prior 8.8M results (CPU + the
-#    in-progress Plan 27 GPU sweeps) were computed against the old corpus and
+#    in-progress GPU sweeps) were computed against the old corpus and
 #    are NOT comparable to anything run against this one — re-run them here.
-#    See memory/corpus-rebaseline-2026-06-08. Deps pinned in scripts/requirements.txt.
+#    Deps pinned in scripts/requirements.txt.
 #
 147b7f5355310f42249940fc1267e4086336dee8910aa1d15d908690be2a04f9  passages.fvecs
 30f7335f9b4a445249b3d89656255b710996824195854726ac3a2728670c6d40  queries.fvecs

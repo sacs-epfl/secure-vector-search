@@ -1,8 +1,7 @@
 //! Braverman–Newman protocol primitives.
 //!
 //! No public reference implementation exists for the paper
-//! (arXiv:2502.13060v3; Phase 0 search closed negative, see
-//! `docs/notes/bntm-from-paper.md`), so `(L, H, S)` are derived
+//! (arXiv:2502.13060v3), so `(L, H, S)` are derived
 //! deterministically from `key_seed` / `h_seed` via ChaCha20 rather
 //! than a paper-validated concrete tuple. That said, this file
 //! faithfully implements the paper's Protocol 1 (§6, p.9): `L, H, S`
@@ -11,13 +10,12 @@
 //! H·(L⊤·v_enc) + S·v_enc` is the trapdoor's actual mechanism, not a
 //! placeholder for it. δ is retuned within the paper's §7 security
 //! floor (`δ·μ > 1/n`) rather than left at an arbitrary constant — see
-//! `params.rs`. Plan 28 fixed an earlier bug where `(H, S)` were
-//! re-derived from scratch on every query instead of being cached.
+//! `params.rs`. `(H, S)` are cached rather than re-derived from
+//! scratch on every query.
 //!
 //! Not implemented: Protocol 3 (§7, p.11), the recursive multi-level
 //! construction that gets the paper's own headline client speedups
 //! (Table 1, up to 25× at n=16385) past the Protocol-1 `Θ(√n)` floor.
-//! Tracked as a follow-up plan.
 //!
 //! Convention: our `l_subspace` is shape `n × n_1`. In the standard
 //! `LH + S` formulation `L` is `m × n_1`, so our `L` is its transpose
@@ -362,7 +360,7 @@ pub(crate) struct EncryptedCluster {
     /// from; retained as the cache-file / fingerprint identity and so
     /// the GPU path can still re-derive `H` on a VRAM-eviction
     /// cache-miss (`gpu/mod.rs`). The CPU decode hot path no longer
-    /// reads this — see `h_mat` / `s_mat` below (Plan 28).
+    /// reads this — see `h_mat` / `s_mat` below.
     pub h_seed: [u8; 32],
     /// Number of vectors (rows of M).
     pub m: usize,
@@ -382,11 +380,9 @@ pub(crate) struct EncryptedCluster {
     /// Client-side trapdoor. `H`, row-major `m × n_1`, materialised
     /// once (at `encrypt_cluster` time, or once at disk-cache-load
     /// time) instead of being regenerated from `h_seed` on every
-    /// query. Same shape and storage choice as `a_l` — this is what
-    /// Plan 28 fixed: the paper's Protocol 1 (arXiv:2502.13060v3, p.9)
-    /// samples `H` once at initialisation and reuses it for every
-    /// online round; the pre-fix code called `regenerate_h_s` inside
-    /// `decode_scores` on every query instead.
+    /// query. Same shape and storage choice as `a_l` — the paper's
+    /// Protocol 1 (arXiv:2502.13060v3, p.9) samples `H` once at
+    /// initialisation and reuses it for every online round.
     pub h_mat: Storage,
     /// Client-side trapdoor. `S`, sparse `m × n`, materialised once
     /// alongside `h_mat`. Cheap to keep resident (μ-rate sparse; ~18
@@ -405,8 +401,7 @@ pub(crate) struct EncryptedCluster {
 ///
 /// `(H, S)` are retained on the returned `EncryptedCluster` (as `h_mat` /
 /// `s_mat`) rather than discarded — the query hot path (`decode_scores`)
-/// reads them directly instead of re-deriving from `h_seed` per query
-/// (Plan 28).
+/// reads them directly instead of re-deriving from `h_seed` per query.
 pub(crate) fn encrypt_cluster(
     m_matrix: &[u64],
     m: usize,
@@ -926,8 +921,7 @@ pub(crate) fn decode_scores(
 
     // M' · v_enc = H · (L⊤ · v_enc) + S · v_enc. `(H, S)` are read from
     // the cluster's cached `h_mat` / `s_mat` — materialised once at
-    // `encrypt_cluster` (or disk-cache-load) time, not regenerated here
-    // (Plan 28; this used to call `regenerate_h_s` on every query).
+    // `encrypt_cluster` (or disk-cache-load) time, not regenerated here.
     let lt_venc = l_transpose_times_vec(l_subspace, n, n1, &encoded.v_enc);
     let h_lt_venc = dense_matvec(cluster.h_mat.as_slice(), m, n1, &lt_venc);
     let s_venc = sparse_times_dense(&cluster.s_mat, &encoded.v_enc);
@@ -1272,7 +1266,7 @@ mod tests {
     }
 
     /// `EncryptedCluster::h_mat` / `s_mat` are populated immediately by
-    /// `encrypt_cluster` (Plan 28) and match exactly what
+    /// `encrypt_cluster` and match exactly what
     /// `regenerate_h_s(h_seed, ...)` would independently produce —
     /// pins the cache-correctness invariant that `decode_scores` now
     /// relies on instead of re-deriving `(H, S)` per query.

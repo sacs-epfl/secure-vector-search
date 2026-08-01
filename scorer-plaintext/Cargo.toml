@@ -5,9 +5,8 @@ edition = "2024"
 
 [features]
 default = []
-# Plan 17 step 1 — pulls cuvs-rs + libcuvs (via the conda env documented
-# in docs/envs/README.md). CPU-only builds (default) never touch cuvs.
-# Plan 27: also pulls `scorer-gpu-common` for the streaming
+# Pulls cuvs-rs + libcuvs (via the rapids conda env). CPU-only builds
+# (default) never touch cuvs. Also pulls `scorer-gpu-common` for the streaming
 # ClusterStore + NVML peak sampler, and `cudarc` for the
 # CudaContext / CudaStream types the store hands back.
 gpu = ["dep:cuvs", "dep:cuvs-sys", "dep:ndarray", "dep:scorer-gpu-common", "dep:cudarc"]
@@ -22,7 +21,7 @@ rand        = { workspace = true }
 rand_chacha = { workspace = true }
 indicatif   = { workspace = true }
 cuvs        = { workspace = true, optional = true }
-# Plan 27: `cuvs-sys::cuvsRMMFree` for manual device-buffer free on
+# `cuvs-sys::cuvsRMMFree` for manual device-buffer free on
 # `CuvsCluster::Drop`. cuvs-rs's high-level `BfIndex::build` consumes
 # the `ManagedTensor` by value and the C++ index keeps a non-owning
 # view, so the dataset device buffer's DLPack deleter has to be
@@ -37,5 +36,5 @@ scorer-gpu-common = { workspace = true, optional = true, features = ["cuvs"] }
 # through `ClusterStore`. The cuVS-backed scorers still run their
 # compute on cuVS's internal stream; the cudarc streams are wired
 # up alongside so the API surface is uniform across cuVS + cudarc
-# scorers (Plan 27).
+# scorers.
 cudarc      = { workspace = true, optional = true }

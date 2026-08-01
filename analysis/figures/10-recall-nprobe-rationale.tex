@@ -1,7 +1,7 @@
 All IVF schemes share the same IVF index (\texttt{n\_centroids =
 ceil($\sqrt{N}$)}, \texttt{train\_seed=42},
-\texttt{max\_iter=25}; an architectural invariant in
-\texttt{CLAUDE.md}), so their recall vs nprobe curves track
+\texttt{max\_iter=25}; an architectural invariant of the
+shared IVF building block), so their recall vs nprobe curves track
 identically --- divergence here would be a bug, not a property.
 The chart's value is reading off ``how aggressive does the probe
 need to be to reach $X$\,\% recall'', independent of any

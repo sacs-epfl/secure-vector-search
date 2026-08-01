@@ -51,7 +51,7 @@ fn main() {
         Ok(s) => {
             panic!(
                 "nvcc failed (exit {}) compiling {}.\n\
-                 Confirm the rapids conda env is active (see docs/envs/README.md)\n\
+                 Confirm the rapids conda env is active\n\
                  and that nvcc is on PATH; current NVCC = {nvcc}.",
                 s.code().unwrap_or(-1),
                 kernel_src.display()
@@ -61,7 +61,7 @@ fn main() {
             panic!(
                 "Could not invoke nvcc ({nvcc}): {e}.\n\
                  The `gpu` feature requires nvcc on PATH; activate the\n\
-                 rapids conda env (see docs/envs/README.md) before building."
+                 rapids conda env before building."
             );
         }
     }

@@ -27,8 +27,6 @@ Already-tracked content stays in git: migration mode enforces this
 via a ``git ls-files`` skip rule; in post-run mode the operator is
 in control of the run-dir argument and we assume they pass a fresh
 run dir.
-
-Operational doc: ``docs/operations/bulk-store.md``.
 """
 
 from __future__ import annotations
@@ -64,7 +62,7 @@ RAW_FILES = ("raw.csv", "top_k.csv", "substep-breakdown.csv")
 RCP_SCRATCH_LOCAL_PROBE = "/mnt/sacs/scratch/shared/secure-vsearch"
 
 # SSH alias the rsync fallback uses; operator must have it in
-# ~/.ssh/config. See docs/operations/bulk-store.md.
+# ~/.ssh/config.
 JUMPHOST_ALIAS = "jumphost"
 
 
@@ -561,7 +559,7 @@ def find_uploadable_runs(
             # 3. git-tracked guard
             if run_has_git_tracked_raw_csv(run_dir, repo_root):
                 skipped.append(
-                    (run_dir, "raw CSVs tracked in git (ADR 009 § 2.5)")
+                    (run_dir, "raw CSVs tracked in git")
                 )
                 continue
             # 4. at least one raw CSV must be present locally — the
@@ -626,7 +624,7 @@ def check_aggregated_precondition(run_dir: Path) -> None:
             f"MACHINE=<id>` (or `python analysis/preprocess.py --results "
             f"<results> --machine <id> --outdir {agg}`) on this host "
             "before uploading. This enforces the producer-side workflow "
-            "invariant per Plan 22 § Context."
+            "invariant."
         )
 
 

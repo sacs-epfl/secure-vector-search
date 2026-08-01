@@ -193,6 +193,6 @@ async fn main() -> anyhow::Result<()> {
     );
 
     println!();
-    println!("Plan 18 Amendment 1 gate: < 2% on BOTH paths ⇒ route through breakdown.");
+    println!("Gate: < 2% on BOTH paths ⇒ route through breakdown.");
     Ok(())
 }

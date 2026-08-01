@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resume the eval-suite on mini after Plan 21 B.1 lands. Skips
+# Resume the eval-suite on mini. Skips
 # `eval-tiptoe-go` (and consequently `tiptoe-diff`) per
 # `results/runs/d81ba182/NOTES.md` — Go 1.26 rejects the pinned
 # simplepir's CGO type aliases. Validation falls back to the

@@ -1,4 +1,4 @@
-// Plan 19 — Optimised BN server-side full GEMV over F_p (p = 2^61 − 1).
+// Optimised BN server-side full GEMV over F_p (p = 2^61 − 1).
 //
 // Computes the same response vector as
 // `scorer_bntm::crypto::compute_products`:
@@ -22,7 +22,7 @@
 //   shared mem: 8192 bytes  — caches v_enc[0..N] for the block
 //
 // This shape (vs. the original one-thread-per-row) gets two perf wins
-// over the kernel committed at 1cc39a9 (Plan 17 step 4):
+// over the original kernel committed at 1cc39a9:
 //
 //   1. **Coalesced m_enc reads.** Adjacent threads in a warp read
 //      adjacent elements of the same row (stride 8 bytes), so a warp
@@ -177,16 +177,16 @@ extern "C" __global__ void bntm_compute_products(
     }
 }
 
-// Plan 20 — Dense GEMV over F_p at the n_1 = 512 inner dimension.
+// Dense GEMV over F_p at the n_1 = 512 inner dimension.
 //
 // Computes the same response vector as a CPU `dense_matvec` over an
 // `m × n_1` matrix and an `n_1` query:
 //
 //   r[i] = sum_{j=0..N1}  mat[i*N1 + j] * v[j]   (mod P)
 //
-// Used twice per decode (Plan 20 § What `decode_scores` actually does):
-// once for `AL · G` and once for `H · (L⊤ · v_enc)`. The two output
-// buffers are combined by a small `add_mod` kernel in Step 3.
+// Used twice per decode: once for `AL · G` and once for
+// `H · (L⊤ · v_enc)`. The two output buffers are combined by the
+// small `add_mod` kernel below.
 //
 // Shape is identical to `bntm_compute_products` above — warp-per-row,
 // 256 threads, two-stage warp + cross-warp reduction — only the inner
@@ -273,7 +273,7 @@ extern "C" __global__ void bntm_decode_dense(
     }
 }
 
-// Plan 20 Step 3 — elementwise add over F_p, length-m.
+// Elementwise add over F_p, length-m.
 //
 // Combines the two `bntm_decode_dense` outputs (AL·G and
 // H·(L⊤·v_enc)) into a single dense partial sum on device, avoiding

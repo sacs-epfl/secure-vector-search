@@ -3,7 +3,7 @@
 DEVICE   ?= auto
 # Dataset name; data lives in data/$(DATASET)/
 DATASET  ?= msmarco
-# Plan 24 — number of passages to subsample from the source corpus and
+# Number of passages to subsample from the source corpus and
 # embed. `msmarco-full` overrides to the full MS MARCO passage count.
 ifeq ($(DATASET),msmarco-full)
 N_PASSAGES ?= 8800000
@@ -26,7 +26,7 @@ BETA              ?= 0.0,0.1,0.5,1.0
 SAP_IVF_BETA      ?= 0.0,0.5
 SAP_IVF_NPROBE_FIXED ?= 32
 TIPTOE_QUANTISATION_BITS ?= 3,4
-# Plan 23 — `eval-batch` sweeps these batch sizes via the `--batch-sizes`
+# `eval-batch` sweeps these batch sizes via the `--batch-sizes`
 # flag (default `1` preserves single-query semantics in every other
 # `eval-*` target). Override to a different sweep on a per-host basis;
 # the harness drops the final partial chunk per query budget so any
@@ -42,7 +42,7 @@ TIPTOE_GO_HINT_MB ?= 25
 # scheme. Threaded only through bin/eval recipes — `tiptoe_go_runner`
 # does not accept this flag.
 EVAL_FLAGS ?=
-# Plan 17 — comma-separated list of cargo features to enable on
+# Comma-separated list of cargo features to enable on
 # bin/eval. Empty (default) builds CPU-only; `gpu` enables the cuvs +
 # cudarc paths for plaintext / sap / emvp / bntm. The `eval-gpu-*`
 # Makefile targets set this automatically; manual `make eval-no-tiptoe
@@ -74,7 +74,7 @@ eval: eval-plaintext eval-sap eval-sap-ivf eval-emvp eval-emvp-ivf eval-tiptoe e
 eval-cold:
 	$(MAKE) eval EVAL_FLAGS=--no-cache
 
-# Plan 21 Phase A — opt-in `target-cpu=native`. Re-runs `eval`
+# Opt-in `target-cpu=native`. Re-runs `eval`
 # with RUSTFLAGS exported for the recursive make, so every cargo
 # invocation in that subprocess tree (compile of bin/eval, the
 # scorer crates, anything cargo-build pulls along the way) picks
@@ -83,8 +83,8 @@ eval-cold:
 # to `.cargo/config.toml` (gitignored) on the producer host.
 #
 # Results recorded under this target carry machine-specific
-# binary differences; see Plan 21 Open question 3 for the
-# cross-machine-comparison filter that landed alongside it.
+# binary differences; the cross-machine-comparison filter is
+# what keeps them from being compared against non-native runs.
 eval-native:
 	RUSTFLAGS="-C target-cpu=native" $(MAKE) eval
 
@@ -95,15 +95,15 @@ eval-native:
 # separately when you actually want Tiptoe data.
 eval-no-tiptoe: eval-plaintext eval-sap eval-sap-ivf eval-emvp eval-emvp-ivf eval-bntm eval-bntm-ivf
 
-# Plan 23 step 9 — figure 14 production sweep. Reuses every non-Tiptoe
+# Figure 14 production sweep. Reuses every non-Tiptoe
 # eval-* target with `--batch-sizes $(BATCH_SIZES)` threaded through
 # EVAL_FLAGS so each bin/eval invocation nests batch-size × quality-
 # param × repetitions inside its sweep loop. Tiptoe is excluded by
-# construction (ADR 010 Decision 3 cost-floor): its `score_batch`
+# construction (per-query cost floor): its `score_batch`
 # falls back to the sequential default, so batched throughput would
 # trace a flat line on figure 14.
 #
-# BN dispatch caveat (per W3): when BATCH_SIZES != [1] the BN scheme
+# BN dispatch caveat: when BATCH_SIZES != [1] the BN scheme
 # routes through `run_eval` (not `run_eval_with_verify_us`), so the
 # per-row `verification-overhead-us` column is 0 on every emitted
 # row. Figure 13 (BN verify on/off) consumes a separate B=1 run from
@@ -236,13 +236,13 @@ eval-tiptoe: $(DATA)/ground_truth.ivecs
 	    --results-dir       $(RESULTS) \
 	    $(EVAL_FLAGS)
 
-# Braverman–Newman trapdoored matrices (Plan 12). Flat scorer sweeps
+# Braverman–Newman trapdoored matrices. Flat scorer sweeps
 # verification on/off via two invocations (BNTM_VERIFICATION). The IVF
 # wrapper sweeps nprobe with verification fixed. BNTM_Q_BITS sets the
-# f32 → F_p quantisation scale Q = 2^BNTM_Q_BITS (Plan 12 § OQ §2 sweep
-# variable; default 20 inherits the EMVP scale).
+# f32 → F_p quantisation scale Q = 2^BNTM_Q_BITS (sweep variable;
+# default 20 inherits the EMVP scale).
 #
-# ADR 011: default flipped to `false` — paper evaluates all schemes
+# Default is `false` — paper evaluates all schemes
 # under HbC threat model alignment; pass `BNTM_VERIFICATION=true` to
 # regenerate figure 13's verification-on data.
 BNTM_VERIFICATION ?= false
@@ -275,7 +275,7 @@ eval-bntm-ivf: $(DATA)/ground_truth.ivecs
 	    --results-dir       $(RESULTS) \
 	    $(EVAL_FLAGS)
 
-# ── breakdown sweeps (Plan 14 § Part B) ───────────────────────────────────────
+# ── breakdown sweeps ──────────────────────────────────────────────────────────
 # Pass --breakdown to bin/eval to capture per-substep timings into
 # substep-breakdown.csv (figure 09a/b). raw.csv is header-only in this
 # mode, so a breakdown run cannot serve double-duty as a throughput run
@@ -400,7 +400,7 @@ eval-breakdown-bntm-ivf: $(DATA)/ground_truth.ivecs
 	    --breakdown \
 	    $(EVAL_FLAGS)
 
-# ── parallel scaling sweep (Plan 13) ──────────────────────────────────────────
+# ── parallel scaling sweep ────────────────────────────────────────────────────
 # Sweeps RAYON_NUM_THREADS (Rust) and GOMAXPROCS (Go) over the sacs006
 # topology: dual-socket Xeon Gold 6426Y, 2 × 16 physical cores + SMT
 # for 64 logical. Three regimes split the sweep:
@@ -478,15 +478,15 @@ eval-scaling-tiptoe: $(DATA)/ground_truth.ivecs tools/tiptoe-go-rev tools/tiptoe
 
 eval-scaling: eval-scaling-no-tiptoe eval-scaling-tiptoe
 
-# ── GPU eval (Plan 17 / ADR 008) ──────────────────────────────────────────────
+# ── GPU eval ──────────────────────────────────────────────────────────────────
 # `eval-gpu-workstation` and `eval-gpu-cloud` run the eval suite with
 # `--device gpu` on every measured scheme that supports it (plaintext,
 # sap, sap-ivf, emvp, emvp-ivf, bntm, bntm-ivf — i.e. `eval-no-tiptoe`).
-# Tiptoe and tiptoe-go are excluded by construction: ADR 008 §6 defers
-# Tiptoe-GPU and reports it via the analytical proxy
+# Tiptoe and tiptoe-go are excluded by construction: Tiptoe-GPU is
+# deferred and reported via the analytical proxy
 # (`effective_bytes_per_query`) only.
 #
-# The conda-resident RAPIDS env (`docs/envs/README.md`) must be active
+# The conda-resident RAPIDS env must be active
 # so cuvs / nvcc are on PATH; without it the build fails with a clear
 # error pointing at the env recipe. The harness's `--gpu-sku` /
 # `--gpu-location` / `--cloud-*` flags map onto Make variables so an
@@ -553,7 +553,7 @@ eval-tiptoe-go: $(DATA)/ground_truth.ivecs tools/tiptoe-go-rev tools/tiptoe-go.p
 # "no paired data" is a hard failure (exit 1), not a skip — the gate must
 # actually run a comparison here. (CI runs without the flag, since its
 # checkout has no bulk-stored CSVs and would otherwise be permanently red;
-# CI surfaces the skip as a loud warning instead. See .github/workflows/ci.yml.)
+# CI surfaces the skip as a loud warning instead.)
 tiptoe-diff:
 	$(PYTHON) analysis/tiptoe_diff.py --results-dir $(RESULTS) --require-data
 
@@ -570,8 +570,7 @@ figures:
 
 # Mirror of `analysis:` for the prerequisite step — emits the canonical
 # results/aggregated/<machine-id>/*.tsv TSVs from results/runs/<machine-id>
-# raw.csv files. Required precondition for `scripts/upload_bulk.py` per
-# ADR 009 § 2.3.
+# raw.csv files. Required precondition for `scripts/upload_bulk.py`.
 preprocess:
 	$(MAKE) -C analysis preprocess $(if $(MACHINE),MACHINE=$(MACHINE),) $(if $(N_PASSAGES),N_PASSAGES=$(N_PASSAGES),)
 
@@ -581,10 +580,8 @@ report:
 		$(if $(MACHINE),MACHINE=$(MACHINE),)
 
 # End-of-run convenience: preprocess → upload_bulk (per run dir) →
-# figures → per-machine report.pdf, in that order. Mirrors the
-# post-eval maintenance pipeline documented in docs/operations/
-# bulk-store.md / CLAUDE.md. Step 1 (campaign backfill) is
-# intentionally NOT bundled — campaign-id is operator-decided per
+# figures → per-machine report.pdf, in that order. Campaign backfill
+# is intentionally NOT bundled — campaign-id is operator-decided per
 # sweep, so the operator runs scripts/backfill_campaign.py
 # separately when needed before this target.
 #

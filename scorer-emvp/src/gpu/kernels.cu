@@ -1,4 +1,4 @@
-// Plan 17 step 3 — EMVP server-side block-GEMV over F_p (p = 2^61 − 1).
+// EMVP server-side block-GEMV over F_p (p = 2^61 − 1).
 //
 // Computes the same partial-product matrix as
 // `scorer_emvp::crypto::compute_products`:

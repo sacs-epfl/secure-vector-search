@@ -14,8 +14,8 @@
 #   7. (pause if sudo not cached) make eval-scaling — fig 07
 #   8. make report                     — assemble PDFs
 #
-# eval-scaling needs passwordless sudo for `tee /proc/sys/vm/drop_caches`
-# (see CLAUDE.md). If `sudo -n true` succeeds (NOPASSWD entry in place
+# eval-scaling needs passwordless sudo for `tee /proc/sys/vm/drop_caches`.
+# If `sudo -n true` succeeds (NOPASSWD entry in place
 # OR cached creds), the script proceeds straight through. If it fails,
 # the script Slack-notifies, prompts for `sudo -v` interactively, and
 # resumes — designed to run unattended on a tmux pane and only
@@ -114,7 +114,6 @@ assert_performance_governor() {
     echo "[suite] Or, to record runs anyway (e.g. you're debugging the"
     echo "[suite] harness, not measuring), re-run with"
     echo "[suite]   ALLOW_NONPERFORMANCE_GOVERNOR=1 scripts/eval-suite.sh"
-    echo "[suite] Background: docs/operations/measurement-hygiene.md"
     exit 1
 }
 

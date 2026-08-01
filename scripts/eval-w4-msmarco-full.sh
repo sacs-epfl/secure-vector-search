@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Plan 24 W4 driver — full 8.8 M MS MARCO sweep on sacs006 CPU with
+# W4 driver — full 8.8 M MS MARCO sweep on sacs006 CPU with
 # a post-plaintext recall-checkpoint pause. Runs four phases
 # sequentially:
 #
@@ -7,11 +7,10 @@
 #        -> parse recall@10 per nprobe from the run's raw.csv
 #        -> Slack-notify the summary
 #        -> block on /tmp/sentinel-w4-continue (operator touches it
-#           to resume; Ctrl-C to abort and revisit n_centroids per
-#           Plan 24 W4 § Checkpoint after plaintext)
+#           to resume; Ctrl-C to abort and revisit n_centroids)
 #   2. make eval-sap-ivf  (nprobe sweep + beta sweep)
 #   3. make eval-emvp-ivf
-#   4. make eval-bntm-ivf BNTM_VERIFICATION=false (ADR 011)
+#   4. make eval-bntm-ivf BNTM_VERIFICATION=false
 #
 # The Slack webhook URL is resolved by deploy/notify.sh.
 # eval-suite.sh is left untouched per the W4 design discussion.
@@ -32,7 +31,7 @@ SENTINEL="/tmp/sentinel-w4-continue"
 START_TS=$(date +%s)
 
 export CAMPAIGN_ID="${CAMPAIGN_ID:-w4-msmarco-full}"
-export CAMPAIGN_TITLE="${CAMPAIGN_TITLE:-Plan 24 W4: 8.8M sacs006 CPU}"
+export CAMPAIGN_TITLE="${CAMPAIGN_TITLE:-W4: 8.8M sacs006 CPU}"
 
 PYTHON_BIN="${PYTHON:-venv/bin/python}"
 DATASET="${DATASET:-msmarco-full}"
@@ -67,7 +66,7 @@ Usage: eval-w4-msmarco-full.sh [--from-phase PHASE | --skip-plaintext]
 Env vars (defaults shown):
   JOB_NAME                eval-w4-msmarco-full-<host>
   CAMPAIGN_ID             w4-msmarco-full
-  CAMPAIGN_TITLE          Plan 24 W4: 8.8M sacs006 CPU
+  CAMPAIGN_TITLE          W4: 8.8M sacs006 CPU
   DATASET                 msmarco-full
   NPROBE                  1,8,64,256,1024,2967
   SAP_IVF_NPROBE_FIXED    64
@@ -146,7 +145,7 @@ run_phase() {
 }
 
 # Recall summary helper. Finds the freshest plaintext run dir whose
-# run-id (a Unix timestamp per CLAUDE.md) is >= $1 and prints one line
+# run-id (a Unix timestamp) is >= $1 and prints one line
 # per (config-label) with mean recall@10 over (query x rep).
 recall_summary_since() {
     local since_ts="$1"
@@ -229,7 +228,7 @@ if [ -e "$SENTINEL" ]; then
     rm -f "$SENTINEL"
 fi
 
-notify ":hourglass: \`${JOB_NAME}\` starting Plan 24 W4 sweep (CAMPAIGN_ID=${CAMPAIGN_ID}, from-phase=${FROM_PHASE})"
+notify ":hourglass: \`${JOB_NAME}\` starting W4 sweep (CAMPAIGN_ID=${CAMPAIGN_ID}, from-phase=${FROM_PHASE})"
 
 if should_run_phase 0; then
     PHASE1_SINCE=$(date +%s)
@@ -274,4 +273,4 @@ else
 fi
 
 ELAPSED=$(( $(date +%s) - START_TS ))
-notify ":white_check_mark: \`${JOB_NAME}\` Plan 24 W4 sweep complete (total $(fmt_elapsed $ELAPSED)). Bulk-store upload + W4-GPU phase are separate operator actions."
+notify ":white_check_mark: \`${JOB_NAME}\` W4 sweep complete (total $(fmt_elapsed $ELAPSED)). Bulk-store upload + W4-GPU phase are separate operator actions."

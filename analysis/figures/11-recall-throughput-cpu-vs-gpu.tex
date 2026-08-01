@@ -4,10 +4,10 @@
 \begin{document}
 \begin{tikzpicture}
   \begin{axis}[
-    % Plan 17 figure 11. Same axes as figure 02 (recall vs QPS,
+    % Figure 11. Same axes as figure 02 (recall vs QPS,
     % log-x), but each scheme contributes two lines: CPU solid and
     % GPU dashed of the same colour. \tiptoe is dotted because its
-    % GPU number is the analytical proxy only (ADR 008 §6).
+    % GPU number is the analytical proxy only.
     xlabel={Throughput (queries/s)},
     ylabel={Recall@$k$},
     xmode=log,
@@ -81,7 +81,7 @@
         {\datadir/recall-throughput-cpu-vs-gpu-bntm-ivf-nprobe.tsv};
       \addlegendentry{\bntm+IVF GPU}
     }{}
-    % \tiptoe-GPU is the analytical proxy only (ADR 008 §6) — no
+    % \tiptoe-GPU is the analytical proxy only — no
     % measured GPU line. The CPU line is what the existing figure 02
     % already shows; we omit the dotted-GPU projection from this
     % chart and let figure 12 (effective bytes) carry the proxy.

@@ -2,7 +2,6 @@
 
 Research prototype comparing five vector similarity search backends
 (Plaintext, SAP/DCPE, EMVP, Tiptoe, BN) behind a shared `Scorer` trait.
-See [`docs/design.md`](docs/design.md) for architecture, threat model, and open questions.
 
 The extended version of the paper, with appendices, is at
 [`extended-version.pdf`](extended-version.pdf).
@@ -17,7 +16,7 @@ The extended version of the paper, with appendices, is at
 | `scorer-sap` | SAP/DCPE — scale-and-perturb; flat scan + IVF variant |
 | `scorer-emvp` | EMVP — encrypted matrix-vector products; `EmvpScorer` (flat scan) + `EmvpIvfScorer` (IVF), Sec128 params |
 | `scorer-tiptoe` | Tiptoe — LWE-based private ANN; in-house LWE + SimplePIR-LHE primitives + `fhe`-based BFV layer with §6.2 limb-decomposition glue. Correctness gated against the Go reference via `analysis/tiptoe_diff.py` |
-| `scorer-bntm` | Braverman–Newman trapdoored matrices (Plan 12) — `BnTmScorer` (flat) + `BnTmIvfScorer` (IVF) over F_p with p = 2^61 − 1, Sec128 params; Protocol 2 (iterated Freivalds) verification for malicious-server detection |
+| `scorer-bntm` | Braverman–Newman trapdoored matrices — `BnTmScorer` (flat) + `BnTmIvfScorer` (IVF) over F_p with p = 2^61 − 1, Sec128 params; Protocol 2 (iterated Freivalds) verification for malicious-server detection |
 | `eval-harness` | Corpus loading, ground-truth computation, benchmark runner; `bin/eval` for in-process scorers and `bin/tiptoe_go_runner` for the Go-reference paired-run validation gate |
 
 ## Running the tests
@@ -108,12 +107,11 @@ make eval-tiptoe-go            # run Tiptoe (Go reference) at matched parameters
 make eval-bntm                 # run BN flat-scan (verification on by default; set BNTM_VERIFICATION=false to compare)
 make eval-bntm-ivf             # run BN+IVF nprobe sweep
 
-# GPU passes (Plan 17 / ADR 008). Activate the rapids conda env first:
-#   conda activate rapids   # provides cuvs, nvcc, libcuda; see docs/envs/README.md
+# GPU passes. Activate the rapids conda env first:
+#   conda activate rapids   # provides cuvs, nvcc, libcuda
 #   export CMAKE_PREFIX_PATH="$CONDA_PREFIX" LIBCLANG_PATH="$CONDA_PREFIX/lib" …
-# (the full env-var matrix is in docs/envs/README.md). Tiptoe is excluded
-# from the GPU targets because Tiptoe-GPU is deferred per ADR 008 §6 and
-# reported via the analytical proxy column only.
+# Tiptoe is excluded from the GPU targets because Tiptoe-GPU is deferred
+# and reported via the analytical proxy column only.
 make eval-gpu-workstation      # eval-no-tiptoe with --device gpu --gpu-sku rtx-5000-ada
                                #   --gpu-location local. Runs the consumer-class
                                #   substrate locally on workstation hardware.
@@ -124,7 +122,7 @@ make eval-gpu-cloud            # eval-no-tiptoe with --device gpu --gpu-sku v100
                                #   command line to match the actual rental — defaults
                                #   document a representative AWS V100 instance pin.
 
-# Diagnostic passes (Plan 14). Each maps to a bin/eval flag:
+# Diagnostic passes. Each maps to a bin/eval flag:
 #   --no-cache   wipes scheme-specific caches at startup so BuildOutcome reports
 #                a true cold build — source for figure 08
 #   --breakdown  switches dispatch to per-scorer score_with_breakdown methods and
@@ -140,13 +138,13 @@ make eval-breakdown-plaintext  # individual --breakdown targets exist for every 
                                #   tiptoe, bntm, bntm-ivf
 
 # Parallel-scaling sub-targets:
-make eval-scaling-no-tiptoe    # Plan 13: thread-count sweep over plaintext/SAP+IVF/
+make eval-scaling-no-tiptoe    # thread-count sweep over plaintext/SAP+IVF/
                                #   EMVP+IVF/BN+IVF (~1 h on sacs006)
-make eval-scaling-tiptoe       # Plan 13: same sweep for Tiptoe (Rust + Go ref). ~7 h.
+make eval-scaling-tiptoe       # same sweep for Tiptoe (Rust + Go ref). ~7 h.
 make eval-scaling              # both passes; runs ~8 h total
 ```
 
-> **Cache-format change (Plan 10).** Disk caches now use hashed filenames
+> **Cache format.** Disk caches use hashed filenames
 > (`.<scorer>-cache-<16hex>.bin`) with self-verifying headers. Old caches
 > from prior versions (`.ivf-cache-{n_centroids}-{seed}-...`,
 > `.sap-ivf-cache-...`, `.emvp-cache-...`) are not auto-deleted; remove
@@ -182,8 +180,8 @@ results/
           raw.csv                  # one row per query × config × repetition
                                    #   (header-only when --breakdown is set)
           top_k.csv                # per-query top-k IDs (rep=0)
-          substep-breakdown.csv    # Plan 14 Part B: per-(scheme, query, substep)
-                                   #   timings — only present when --breakdown is set
+          substep-breakdown.csv    # per-(scheme, query, substep) timings —
+                                   #   only present when --breakdown is set
           run-metadata.toml        # full provenance (git state, hardware, config, timing,
                                    #   [index] block with cold-build outcome,
                                    #   no-cache / breakdown intent flags)
@@ -197,7 +195,3 @@ results/
 ```
 
 Old runs are never overwritten; delete `results/runs/` and `results/index.csv` to start fresh.
-
-## References
-
-See [`docs/references.md`](docs/references.md) for the key papers.

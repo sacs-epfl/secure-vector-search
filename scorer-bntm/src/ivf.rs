@@ -313,7 +313,7 @@ impl Scorer for BnTmIvfScorer {
         // fingerprint because the encrypted matrix bakes Q in (a
         // quantisation sweep would otherwise reuse a stale cache).
         //
-        // Tag bumped to "bntm-ivf2" (Plan 28): the on-disk layout gained
+        // Tag bumped to "bntm-ivf2": the on-disk layout gained
         // a new per-cluster `h_mat` region, so old "bntm-ivf"-tagged
         // cache files must not be mistaken for the new layout — the tag
         // change forces a different fingerprint/filename, so old caches
@@ -1842,7 +1842,7 @@ fn load_bntm_ivf_cache(
         }
         offset += m_plain_len * 8;
 
-        // h_mat (Plan 28): dense m × n_1, same shape/region pattern as
+        // h_mat: dense m × n_1, same shape/region pattern as
         // a_l. Persisted to disk (unlike S) so the load path never
         // needs to regenerate H.
         let h_mat_len = m * n1;
@@ -2339,7 +2339,7 @@ mod tests {
     /// kernel-arithmetic divergence would surface as
     /// `BnTmIvfError::VerificationFailed` rather than a silent
     /// ranking mismatch — same defence-in-depth as the flat-BN GPU
-    /// gate. Requires the rapids conda env (`docs/envs/README.md`).
+    /// gate. Requires the rapids conda env.
     #[cfg(feature = "gpu")]
     #[tokio::test]
     async fn gpu_full_probe_matches_cpu_exact() {

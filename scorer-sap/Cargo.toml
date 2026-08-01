@@ -5,9 +5,8 @@ edition = "2024"
 
 [features]
 default = []
-# Plan 17 step 2 — pulls cuvs-rs + libcuvs (via the conda env documented
-# in docs/envs/README.md). CPU-only builds (default) never touch cuvs.
-# Plan 27 PR 3: also pulls `scorer-gpu-common` for the streaming
+# Pulls cuvs-rs + libcuvs (via the rapids conda env). CPU-only builds
+# (default) never touch cuvs. Also pulls `scorer-gpu-common` for the streaming
 # ClusterStore + NVML peak sampler, plus `cuvs-sys` for the manual
 # `cuvsRMMFree` on CuvsCluster::Drop (closes the cuVS dataset-lifetime
 # memory leak that compounds under LRU eviction — see scorer-plaintext's
@@ -29,7 +28,7 @@ cuvs-sys    = { version = "26.4", optional = true }
 ndarray     = { workspace = true, optional = true }
 scorer-gpu-common = { workspace = true, optional = true, features = ["cuvs"] }
 cudarc      = { workspace = true, optional = true }
-# Plan 25 step 6 — `l2_simd` (f64 sum-of-squares SIMD). Code added but
-# not yet wired into the hot path; the dispatcher swap waits for the
-# step 6 per-site micro-bench to confirm >1.0× over LLVM auto-vec.
+# `l2_simd` (f64 sum-of-squares SIMD). Code added but not yet wired
+# into the hot path; the dispatcher swap waits for the per-site
+# micro-bench to confirm >1.0× over LLVM auto-vec.
 wide        = { workspace = true }

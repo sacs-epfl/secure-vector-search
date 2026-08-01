@@ -37,7 +37,7 @@ fn main() {
     let n = params.n;
 
     println!(
-        "=== Plan 25 step 5 — EMVP compute_products scalar vs avx512 ===\n  m={M}  s={s}  b={b}  n={n}  (SEC128)"
+        "=== EMVP compute_products scalar vs avx512 ===\n  m={M}  s={s}  b={b}  n={n}  (SEC128)"
     );
 
     let mut rng = ChaCha20Rng::seed_from_u64(0xC0DE_BEEF ^ 0xE);
@@ -113,7 +113,7 @@ fn main() {
         std::process::exit(0);
     } else {
         println!(
-            "RECOMMEND: keep scalar compute_products. EMVP site 5 stays as dead-code under the cfg gate; document the gap in Plan 25's results section."
+            "RECOMMEND: keep scalar compute_products. The SIMD site stays as dead-code under the cfg gate."
         );
         std::process::exit(1);
     }

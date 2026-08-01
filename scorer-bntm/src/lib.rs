@@ -6,9 +6,9 @@
 //! simple (non-recursive) client protocol, faithfully: `(L, H, S)` are
 //! cached at cluster initialisation and reused across queries, and δ
 //! is retuned within the paper's own §7 security floor rather than
-//! left at an arbitrary constant (Plan 28). No public reference
+//! left at an arbitrary constant. No public reference
 //! implementation exists to validate the concrete parameter tuple
-//! against (Phase 0 search closed negative), so `(n, n_1, μ, δ, ε)`
+//! against, so `(n, n_1, μ, δ, ε)`
 //! are chosen conservatively rather than paper-validated — see
 //! `params.rs`. Protocol 3 (§7's recursive, further-sublinear
 //! construction) is not implemented; it's a materially bigger lift,
@@ -236,7 +236,7 @@ impl Scorer for BnTmScorer {
 
         // Quantise vectors on the async task before spawn_blocking; the
         // upcast is O(m·d) and shouldn't be hidden inside the blocking
-        // closure (CLAUDE.md scorer checklist).
+        // closure.
         let m = vectors.len();
         let q = config.quantisation_q;
         let m_q: Vec<u64> = vectors
@@ -290,7 +290,7 @@ impl Scorer for BnTmScorer {
                     let vram_budget = config.vram_budget_bytes;
                     let state = tokio::task::spawn_blocking(move || {
                         // (H, S) are already materialised on
-                        // `handle.cluster` (Plan 28) — no need to
+                        // `handle.cluster` — no need to
                         // regenerate here. H is uploaded to device; S
                         // is retained on the GpuState so the GPU decode
                         // dispatch can compute `S · v_enc` per query.
@@ -1185,7 +1185,7 @@ mod tests {
     /// cadence, (b) the periodic in-flight reduction at j&31==31
     /// matches CPU, (c) H2D / D2H preserve u64 ordering, (d) the
     /// (i, j) → output mapping matches the CPU row-major layout.
-    /// Requires the rapids conda env (`docs/envs/README.md`).
+    /// Requires the rapids conda env.
     #[cfg(feature = "gpu")]
     #[tokio::test]
     async fn gpu_kernel_partials_match_cpu_exact() {
@@ -1476,7 +1476,7 @@ mod tests {
             let cpu_mv = crypto_decode_scores(&r, &cluster, &l_subspace, &encoded, params);
 
             // GPU dispatch. (H, S) come straight from the cluster's own
-            // cached trapdoor material (Plan 28) rather than a fresh
+            // cached trapdoor material rather than a fresh
             // regeneration.
             let m_enc_for_gpu = cluster.m_enc.as_slice().to_vec();
             let a_l_for_gpu = cluster.a_l.as_slice().to_vec();

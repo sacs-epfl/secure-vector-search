@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs the full paper-eval bundle on a CPU pod (every pass listed in the
-# README under "Run every evaluation needed for the paper" + the Plan 23
-# W3 batch sweep) and Slack-posts at start, per phase start/finish, on
+# README under "Run every evaluation needed for the paper" + the
+# batch sweep) and Slack-posts at start, per phase start/finish, on
 # each phase failure, and on overall completion. Designed to be the
 # argument to deploy/runai-submit-cpu.sh — the cd into $SCRATCH and the
 # UID/GID context are already set up by RunAI.
@@ -18,7 +18,7 @@
 #   4. make eval-bntm  BNTM_VERIFICATION=false         — fig 13 (verify-off B=1)
 #   5. make eval-bntm-ivf BNTM_VERIFICATION=false      — fig 13 (verify-off B=1)
 #   6. make tiptoe-diff                                — Tiptoe Rust vs Go gate
-#   7. make eval-batch                                 — Plan 23 W3 (fig 14, verify-on)
+#   7. make eval-batch                                 — fig 14 (verify-on)
 #   8. make eval-bntm BNTM_VERIFICATION=false
 #         EVAL_FLAGS='--batch-sizes 1,8,64,256'        — fig 14 BN-no-verify line
 #   9. make eval-bntm-ivf BNTM_VERIFICATION=false
@@ -27,7 +27,7 @@
 # Skip-phase env-vars (set to non-empty to skip):
 #   SKIP_COLD       — skip phase 2 (`make eval-cold`)
 #   SKIP_BREAKDOWN  — skip phase 3 (`make eval-breakdown`)
-#   SKIP_BATCH      — skip phases 7-9 (Plan 23 W3 batched sweep)
+#   SKIP_BATCH      — skip phases 7-9 (batched sweep)
 #   SKIP_TIPTOE     — skip phase 6 (`make tiptoe-diff`)
 #
 # Slack notifications fire only when SLACK_WEBHOOK is set (forwarded

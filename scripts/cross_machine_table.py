@@ -207,12 +207,12 @@ def main() -> None:
     print("**Caveats** (read before drawing conclusions):")
     print()
     print("- `cores` (machines.csv) vs `threads` (run-metadata.toml's "
-          "rayon-realised pool, Plan 13). A `*` after `threads` flags a "
+          "rayon-realised pool). A `*` after `threads` flags a "
           "mismatch, typically a cgroup-shaped RunAI pod.")
     print("- `gpu-kind` is host-available accelerator; `dev` is what the "
-          "eval actually used (Plan 17 `--device` axis). `dev=cpu` on a "
+          "eval actually used (the `--device` axis). `dev=cpu` on a "
           "`gpu-kind=cuda` host means GPU was present but the scorer ran "
-          "on CPU — no Step-1+ feature, or scorer doesn't have a GPU path.")
+          "on CPU — no `gpu` feature, or scorer doesn't have a GPU path.")
     print("- Cross-machine *latency* is meaningful only when `cores`, "
           "`threads`, `dev`, and CPU class agree across the rows being "
           "compared. Recall is hardware-independent and always cross-comparable.")

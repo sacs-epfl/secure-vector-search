@@ -1,6 +1,6 @@
-# Pinned commit SHAs for the Tiptoe Go reference, used by Phase 0 of
-# Plan 11 (`docs/plans/11-tiptoe.md`) and by the validation gate in
-# ADR 005. Update only when intentionally bumping references.
+# Pinned commit SHAs for the Tiptoe Go reference, used by the Rust
+# port and by the Rust-vs-Go validation gate. Update only when
+# intentionally bumping references.
 #
 # Format: one `<repo> <commit>` pair per line.
 #

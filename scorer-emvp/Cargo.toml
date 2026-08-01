@@ -6,15 +6,15 @@ build = "build.rs"
 
 [features]
 default = []
-# Plan 17 step 3 — pulls cudarc and triggers the build.rs nvcc → PTX
+# Pulls cudarc and triggers the build.rs nvcc → PTX
 # compilation step for the custom Mersenne block-GEMV kernel. CPU-only
 # builds (default) skip both: cudarc is optional, build.rs short-circuits
 # when CARGO_FEATURE_GPU is unset.
-# Plan 27 PR 4: also pulls `scorer-gpu-common` for the streaming
+# Also pulls `scorer-gpu-common` for the streaming
 # ClusterStore + NVML peak sampler. No `cuvs-sys` here — EMVP's GPU
 # path is cudarc-only, so cluster device memory is owned by
 # `CudaSlice<u64>` and freed automatically on Drop (no equivalent of
-# the cuvs dataset-lifetime leak that PR 2 / PR 3 had to work
+# the cuvs dataset-lifetime leak the cuVS-backed scorers work
 # around).
 gpu = ["dep:cudarc", "dep:scorer-gpu-common", "scorer-gpu-common/cuda"]
 

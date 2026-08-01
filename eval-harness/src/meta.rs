@@ -592,14 +592,14 @@ mod tests {
     #[test]
     fn campaign_id_and_title_present_emits_block() {
         let c = Campaign::try_new(
-            Some("plan22-validation-2026-05-12".into()),
-            Some("Plan 22 e2e".into()),
+            Some("validation-2026-05-12".into()),
+            Some("bulk-store e2e".into()),
             None,
         )
         .unwrap()
         .unwrap();
-        assert_eq!(c.id, "plan22-validation-2026-05-12");
-        assert_eq!(c.title, "Plan 22 e2e");
+        assert_eq!(c.id, "validation-2026-05-12");
+        assert_eq!(c.title, "bulk-store e2e");
         assert_eq!(c.note, None);
     }
 
@@ -683,7 +683,7 @@ mod tests {
     #[test]
     fn campaign_id_accepts_allowed_chars() {
         // Convention example for an allowed campaign id.
-        let allowed = "plan20-decode-gpu.2026-05-14:rep1";
+        let allowed = "decode-gpu.2026-05-14:rep1";
         let c = Campaign::try_new(Some(allowed.into()), Some("t".into()), None)
             .unwrap()
             .unwrap();
@@ -701,15 +701,15 @@ mod tests {
     #[test]
     fn campaign_serialises_to_kebab_case_toml() {
         let c = Campaign::try_new(
-            Some("plan22-acceptance-2026-05-12".into()),
-            Some("Plan 22 acceptance".into()),
+            Some("acceptance-2026-05-12".into()),
+            Some("bulk-store acceptance".into()),
             Some("hello".into()),
         )
         .unwrap()
         .unwrap();
         let s = toml::to_string(&c).unwrap();
-        assert!(s.contains(r#"id = "plan22-acceptance-2026-05-12""#));
-        assert!(s.contains(r#"title = "Plan 22 acceptance""#));
+        assert!(s.contains(r#"id = "acceptance-2026-05-12""#));
+        assert!(s.contains(r#"title = "bulk-store acceptance""#));
         assert!(s.contains(r#"note = "hello""#));
     }
 

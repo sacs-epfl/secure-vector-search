@@ -176,7 +176,7 @@ def main() -> int:
 
     if not _ID_RE.match(args.id):
         ap.error(
-            f"--id {args.id!r} doesn't match Plan 22 charset "
+            f"--id {args.id!r} doesn't match the campaign-id charset "
             f"[A-Za-z0-9._:-]{{1,128}}"
         )
     if not args.title.strip():

@@ -5,12 +5,11 @@ edition = "2024"
 
 [features]
 default = []
-# Plan 17 — forwards to each scorer crate's `gpu` feature so
+# Forwards to each scorer crate's `gpu` feature so
 # `cargo build -p eval-harness --features gpu` actually compiles in
 # every cuVS / CUDA code path that has landed. Without this feature,
 # `--device gpu` bails at runtime with the corresponding scorer's
-# `GpuFeatureNotEnabled` variant. EMVP / BN GPU paths (Plan 17
-# Steps 3–4) will be added to this list as they land.
+# `GpuFeatureNotEnabled` variant.
 gpu = [
     "scorer-plaintext/gpu",
     "scorer-sap/gpu",
@@ -27,7 +26,7 @@ scorer-emvp      = { path = "../scorer-emvp" }
 scorer-tiptoe    = { path = "../scorer-tiptoe" }
 scorer-bntm      = { path = "../scorer-bntm" }
 ivf-index        = { path = "../ivf-index" }
-# Plan 27 — only pulled when the `gpu` feature flips on. Used by the
+# Only pulled when the `gpu` feature flips on. Used by the
 # eval binary to resolve the streaming VRAM budget once per run
 # (via NVML 80 % auto-detect or the `--gpu-vram-budget-bytes`
 # override) and to sample the realised peak written into

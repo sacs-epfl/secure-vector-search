@@ -4,8 +4,8 @@
 //! Compiled only when the `gpu` Cargo feature is enabled. The CUDA
 //! kernel source lives in `kernels.cu`; `build.rs` invokes `nvcc` at
 //! crate build time to produce `bntm_kernels.ptx` in `OUT_DIR`, which
-//! `include_str!` pulls in below. Build recipe in
-//! `docs/envs/README.md` (rapids conda env provides nvcc 12.4).
+//! `include_str!` pulls in below. Requires the rapids conda env
+//! (provides nvcc 12.4).
 //!
 //! ## What the GPU path actually does
 //!
@@ -31,8 +31,8 @@
 //! miss-then-evict it drops the LRU tail's `CudaSlice<u64>`s,
 //! returning device memory to the cudarc memory pool. A subsequent
 //! re-hit re-uploads M_enc + AL + H straight from the host-resident
-//! `EncryptedCluster` (materialised once at handle build / cache load
-//! — Plan 28; no per-re-hit regeneration).
+//! `EncryptedCluster` (materialised once at handle build / cache load;
+//! no per-re-hit regeneration).
 //!
 //! The host-side sparse `S` matrix stays on host in
 //! `IvfGpuState::s_mats`; it's never device-resident.

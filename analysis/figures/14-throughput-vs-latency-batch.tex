@@ -4,14 +4,14 @@
 \begin{document}
 \begin{tikzpicture}
   \begin{axis}[
-    % Plan 23 W4 — throughput vs per-query latency, batch size as the
+    % Figure 14 — throughput vs per-query latency, batch size as the
     % operating-point parameter. Points along each per-scheme line
     % correspond to B ∈ {1, 8, 64, 256} (or whatever sweep the
     % producer ran). Log-log so the regime crossover is visible:
     % schemes that retain a positive throughput slope as B grows are
     % amortising fixed overhead; schemes that flatten quickly are
-    % compute-bound at the chosen m (per ADR 010 Addendum 2 § Paper
-    % framing — the regime-crossover story is the contribution).
+    % compute-bound at the chosen m — the regime-crossover story is
+    % the contribution.
     xlabel={Per-query latency (ms, amortised at B$>$1)},
     ylabel={Aggregate throughput (queries/s)},
     xmode=log,

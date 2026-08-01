@@ -134,7 +134,7 @@ pub fn score_query(
         .collect();
 
     // 10. Top-k by score descending. Cap k at cluster size per the
-    //     CLAUDE.md scorer invariant ("k > cluster_size is capped, not
+    //     scorer invariant ("k > cluster_size is capped, not
     //     rejected").
     scored.sort_unstable_by(|a, b| b.1.total_cmp(&a.1));
     scored.truncate(k);

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Plan 25 step 5 / 6 / 7 chain — bench + re-measurement.
+# SIMD bench + re-measurement chain.
 #
 # Run after the W4 BN sweep's SIGTERM watcher fires (i.e., after the
 # `target/release/eval --scorer bntm-ivf` process exits and the
@@ -13,27 +13,27 @@
 #      run-metadata.toml so a future re-upload won't skip; flip
 #      `status = "partial"` → `"complete"` so the upload_bulk guard
 #      (commit c095ff5) doesn't block.
-#   2. Step 6 L2 benches: l2_f32_simd vs scalar, l2_simd vs scalar.
+#   2. L2 benches: l2_f32_simd vs scalar, l2_simd vs scalar.
 #      Each bench prints a wire-in recommendation; the script does
 #      NOT auto-edit source — the operator reviews and (optionally)
 #      hand-wires the dispatcher in `ivf-index/src/distance.rs` /
 #      `scorer-sap/src/distance.rs`.
-#   3. Step 5 EMVP bench: compute_products_avx512 vs scalar. Same
+#   3. EMVP bench: compute_products_avx512 vs scalar. Same
 #      review-then-wire workflow.
-#   4. Step 7 end-to-end re-measurement: rebuild with `make eval-
+#   4. End-to-end re-measurement: rebuild with `make eval-
 #      native`, re-run bntm-ivf at `nprobe=64,256` (matches the
 #      in-flight scalar baseline you'll have just cleaned up), and
 #      print per-config mean-latency deltas vs that baseline.
 #
 # Usage:
-#   scripts/plan25-bench-chain.sh
+#   scripts/simd-bench-chain.sh
 #
 # Env (defaults shown):
 #   DATASET=msmarco-full
 #   MACHINE_ID=d860be76
 #   BASELINE_RUN_DIR=results/runs/d860be76/3c4a3aacf48747518a3b8337423e7e48ceaef9d7/1779263883
 #   NPROBE=64,256
-#   SKIP_END_TO_END=0  (set to 1 to bench only, skip step 7)
+#   SKIP_END_TO_END=0  (set to 1 to bench only, skip the re-measurement)
 #
 # Cosmetic / non-blocking: the W4 driver's run_phase wrapper around
 # `make eval-bntm-ivf` Slack-notified a `:x:` failure when the SIGTERM
@@ -51,7 +51,7 @@ MACHINE_ID="${MACHINE_ID:-d860be76}"
 BASELINE_RUN_DIR="${BASELINE_RUN_DIR:-results/runs/d860be76/3c4a3aacf48747518a3b8337423e7e48ceaef9d7/1779263883}"
 NPROBE="${NPROBE:-64,256}"
 SKIP_END_TO_END="${SKIP_END_TO_END:-0}"
-LOG_DIR="logs/plan25-bench-chain-$(date +%Y%m%dT%H%M%S)"
+LOG_DIR="logs/simd-bench-chain-$(date +%Y%m%dT%H%M%S)"
 
 mkdir -p "$LOG_DIR"
 echo "[chain] logs at $LOG_DIR"
@@ -137,15 +137,15 @@ if new == text:
 p.write_text(new)
 PY
     echo "[chain] cleanup complete: $BASELINE_RUN_DIR"
-    notify_or_echo ":broom: Plan 25 chain: cleanup done on \`${BASELINE_RUN_DIR}\`"
+    notify_or_echo ":broom: bench chain: cleanup done on \`${BASELINE_RUN_DIR}\`"
 }
 
 # ---------------------------------------------------------------------------
-# Step 6: L2 benches (Family B). Records exit codes; does NOT auto-wire.
+# L2 benches (Family B). Records exit codes; does NOT auto-wire.
 # ---------------------------------------------------------------------------
 step_l2_benches() {
     echo
-    echo "===> step 6a — l2_f32 (ivf-index) bench"
+    echo "===> l2_f32 (ivf-index) bench"
     local rc
     RUSTFLAGS="-C target-cpu=native" cargo run --release \
         --example l2_f32_simd_bench -p ivf-index 2>&1 | tee "$LOG_DIR/l2_f32_simd_bench.log"
@@ -153,21 +153,21 @@ step_l2_benches() {
     echo "[chain] l2_f32 bench rc=$rc (0 = wire SIMD in, 1 = keep scalar, 2 = no AVX-512)"
 
     echo
-    echo "===> step 6b — l2 (scorer-sap) bench"
+    echo "===> l2 (scorer-sap) bench"
     RUSTFLAGS="-C target-cpu=native" cargo run --release \
         --example l2_simd_bench -p scorer-sap 2>&1 | tee "$LOG_DIR/l2_simd_bench.log"
     rc=${PIPESTATUS[0]}
     echo "[chain] l2 bench rc=$rc (0 = wire SIMD in, 1 = keep scalar, 2 = no AVX-512)"
 
-    notify_or_echo ":chart_with_upwards_trend: Plan 25 step 6 L2 benches done — see \`${LOG_DIR}/l2*.log\` for the wire-in recommendation"
+    notify_or_echo ":chart_with_upwards_trend: L2 benches done — see \`${LOG_DIR}/l2*.log\` for the wire-in recommendation"
 }
 
 # ---------------------------------------------------------------------------
-# Step 5: EMVP bench (Family A site 5). Records exit; does NOT auto-wire.
+# EMVP bench (Family A). Records exit; does NOT auto-wire.
 # ---------------------------------------------------------------------------
 step_emvp_bench() {
     echo
-    echo "===> step 5 — EMVP compute_products bench"
+    echo "===> EMVP compute_products bench"
     local rc
     RUSTFLAGS="-C target-cpu=native" cargo run --release \
         --example emvp_compute_products_simd_bench -p scorer-emvp 2>&1 \
@@ -175,22 +175,22 @@ step_emvp_bench() {
     rc=${PIPESTATUS[0]}
     echo "[chain] emvp bench rc=$rc (0 = wire SIMD in @ ≥1.355×, 1 = keep scalar, 2 = no AVX-512)"
 
-    notify_or_echo ":chart_with_upwards_trend: Plan 25 step 5 EMVP bench done — see \`${LOG_DIR}/emvp_compute_products_simd_bench.log\`"
+    notify_or_echo ":chart_with_upwards_trend: EMVP bench done — see \`${LOG_DIR}/emvp_compute_products_simd_bench.log\`"
 }
 
 # ---------------------------------------------------------------------------
-# Step 7: end-to-end re-measurement. Re-runs bntm-ivf at NPROBE on a
+# End-to-end re-measurement. Re-runs bntm-ivf at NPROBE on a
 #         native build; compares per-config mean latency to the
 #         cleaned-up scalar baseline above.
 # ---------------------------------------------------------------------------
 step_end_to_end() {
     if [ "$SKIP_END_TO_END" = "1" ]; then
-        echo "[chain] SKIP_END_TO_END=1 — skipping step 7"
+        echo "[chain] SKIP_END_TO_END=1 — skipping the re-measurement"
         return 0
     fi
     echo
-    echo "===> step 7 — end-to-end re-measurement (native build, NPROBE=${NPROBE})"
-    notify_or_echo ":hourglass: Plan 25 step 7: end-to-end bntm-ivf re-run starting (NPROBE=${NPROBE})"
+    echo "===> end-to-end re-measurement (native build, NPROBE=${NPROBE})"
+    notify_or_echo ":hourglass: end-to-end bntm-ivf re-run starting (NPROBE=${NPROBE})"
 
     # Rebuild + re-run with native flags. The eval harness writes a
     # new run dir under results/runs/<machine>/<sha>/<run-id>/.
@@ -201,7 +201,7 @@ step_end_to_end() {
             NPROBE="$NPROBE" \
             BNTM_VERIFICATION=false \
             2>&1 | tee "$LOG_DIR/step7-eval.log"; then
-        notify_or_echo ":x: Plan 25 step 7 failed during eval — see \`${LOG_DIR}/step7-eval.log\`"
+        notify_or_echo ":x: end-to-end re-measurement failed during eval — see \`${LOG_DIR}/step7-eval.log\`"
         exit 1
     fi
 
@@ -209,7 +209,7 @@ step_end_to_end() {
     local new_run_dir
     new_run_dir=$(ls -dt "results/runs/${MACHINE_ID}/"*/[0-9]*/ 2>/dev/null | head -1)
     if [ -z "$new_run_dir" ] || [ ! -f "${new_run_dir}/raw.csv" ]; then
-        notify_or_echo ":x: Plan 25 step 7: cannot locate new run dir (or its raw.csv)"
+        notify_or_echo ":x: end-to-end re-measurement: cannot locate new run dir (or its raw.csv)"
         exit 1
     fi
     echo "[chain] new run dir: $new_run_dir"
@@ -230,7 +230,7 @@ def per_config_lat(path):
 base = per_config_lat(baseline_path)
 simd = per_config_lat(simd_path)
 shared = sorted(set(base.keys()) & set(simd.keys()))
-print(f"=== Plan 25 step 7 — per-config wallclock (mean latency-us, lower is better) ===")
+print(f"=== per-config wallclock (mean latency-us, lower is better) ===")
 print(f"  baseline scalar : {baseline_path}")
 print(f"  SIMD native     : {simd_path}")
 print()
@@ -240,22 +240,22 @@ for label in shared:
     print(f"  {label:<24} {base[label]:>12.1f} {simd[label]:>12.1f} {sp:>9.3f}×")
 PY
     cat "$LOG_DIR/step7-comparison.txt"
-    notify_or_echo ":white_check_mark: Plan 25 step 7 done — see \`${LOG_DIR}/step7-comparison.txt\` for the per-config speedup table"
+    notify_or_echo ":white_check_mark: end-to-end re-measurement done — see \`${LOG_DIR}/step7-comparison.txt\` for the per-config speedup table"
 }
 
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
-notify_or_echo ":arrow_forward: Plan 25 chain starting (DATASET=${DATASET}, NPROBE=${NPROBE})"
+notify_or_echo ":arrow_forward: bench chain starting (DATASET=${DATASET}, NPROBE=${NPROBE})"
 step_preflight
 step_cleanup
 step_l2_benches
 step_emvp_bench
 step_end_to_end
-notify_or_echo ":white_check_mark: Plan 25 chain complete — logs at \`${LOG_DIR}\`"
+notify_or_echo ":white_check_mark: bench chain complete — logs at \`${LOG_DIR}\`"
 echo
 echo "[chain] complete. Inspect:"
-echo "  $LOG_DIR/l2_f32_simd_bench.log         (step 6a recommendation)"
-echo "  $LOG_DIR/l2_simd_bench.log             (step 6b recommendation)"
-echo "  $LOG_DIR/emvp_compute_products_simd_bench.log  (step 5 recommendation)"
-echo "  $LOG_DIR/step7-comparison.txt          (step 7 per-config speedup)"
+echo "  $LOG_DIR/l2_f32_simd_bench.log         (l2_f32 recommendation)"
+echo "  $LOG_DIR/l2_simd_bench.log             (l2 recommendation)"
+echo "  $LOG_DIR/emvp_compute_products_simd_bench.log  (EMVP recommendation)"
+echo "  $LOG_DIR/step7-comparison.txt          (per-config speedup)"

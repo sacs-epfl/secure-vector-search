@@ -45,7 +45,7 @@ fn median(times: &mut [Duration]) -> Duration {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-    println!("Plan 23 step 7 — EMVP score_batch envelope-gate micro-bench");
+    println!("EMVP score_batch envelope-gate micro-bench");
     println!("  m={M}  dim={DIM}  B={B}  k={K}  chunks={CHUNKS}");
     println!(
         "  m_hat size  ≈ {} MB  (m × SEC128.n × 8 = {} × {} × 8)",

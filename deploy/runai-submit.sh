@@ -82,7 +82,7 @@ if [ -n "${SLACK_WEBHOOK:-}" ]; then
   cmd+=(--environment "SLACK_WEBHOOK=${SLACK_WEBHOOK}")
 fi
 
-# Plan 22 / ADR 009 § 2.4 campaign tagging. Forward each CAMPAIGN_*
+# Campaign tagging. Forward each CAMPAIGN_*
 # var if set in the operator's env at submit time — `bin/eval`'s clap
 # Args reads them via `env = "CAMPAIGN_ID"` so no per-Makefile-target
 # wiring is needed. CAMPAIGN_ID + CAMPAIGN_TITLE are a required pair

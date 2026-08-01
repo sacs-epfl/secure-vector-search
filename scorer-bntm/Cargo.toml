@@ -6,11 +6,11 @@ build = "build.rs"
 
 [features]
 default = []
-# Plan 17 step 4 — pulls cudarc and triggers the build.rs nvcc → PTX
+# Pulls cudarc and triggers the build.rs nvcc → PTX
 # step for the BN-specific Mersenne full-GEMV kernel. CPU-only builds
 # (default) skip both: cudarc is optional, build.rs short-circuits
 # when CARGO_FEATURE_GPU is unset. Mirrors scorer-emvp's gpu feature.
-# Plan 27 PR 5: also pulls `scorer-gpu-common` for the streaming
+# Also pulls `scorer-gpu-common` for the streaming
 # ClusterStore + NVML peak sampler.
 gpu = ["dep:cudarc", "dep:scorer-gpu-common", "scorer-gpu-common/cuda"]
 

@@ -219,8 +219,8 @@ struct Args {
     /// Campaign id. Stable, machine-parseable
     /// identifier grouping this run with related ones (planned sweep,
     /// figure-anchoring batch, exploratory). Convention (not enforced):
-    /// `<plan-or-fig>-<hardware-tier>-<ISO-date>`, e.g.
-    /// `plan20-decode-gpu-2026-05-14`. Allowed chars: ASCII
+    /// `<topic-or-fig>-<hardware-tier>-<ISO-date>`, e.g.
+    /// `decode-gpu-2026-05-14`. Allowed chars: ASCII
     /// alphanumerics, `-`, `_`, `.`, `:`. Max 128 chars.
     ///
     /// Setting `--campaign-id` requires `--campaign-title` and vice
@@ -1200,11 +1200,11 @@ async fn main() -> anyhow::Result<()> {
     if args.device == DeviceArg::Gpu && matches!(args.scorer, SchemeArg::Tiptoe) {
         bail!(
             "--device gpu is not supported for --scorer tiptoe — Tiptoe-GPU is\n       \
-             deferred per ADR 008 §6 (analytical proxy only). The `tiptoe-go`\n       \
+             deferred (analytical proxy only). The `tiptoe-go`\n       \
              paired runner is its own binary (`bin/tiptoe_go_runner`) and pins\n       \
              device = \"cpu\" by construction. All other measured schemes\n       \
              (plaintext, sap, sap-ivf, emvp, emvp-ivf, bntm, bntm-ivf) accept\n       \
-             --device gpu under Plan 17."
+             --device gpu."
         );
     }
 
@@ -1230,7 +1230,7 @@ async fn main() -> anyhow::Result<()> {
         // spuriously low peak.
         let nvml_idx = scorer_gpu_common::nvml_index_for_cuda_device(0);
         let budget = scorer_gpu_common::resolve_budget(args.gpu_vram_budget_bytes, nvml_idx)
-            .map_err(|e| anyhow::anyhow!("Plan 27 VRAM budget resolver: {e}"))?;
+            .map_err(|e| anyhow::anyhow!("VRAM budget resolver: {e}"))?;
         let sampler = scorer_gpu_common::PeakVramSampler::start_default(nvml_idx).ok();
         (Some(budget), sampler)
     } else {

@@ -3,7 +3,7 @@ name = "scorer-gpu-common"
 version = "0.1.0"
 edition = "2024"
 
-# Plan 27 — shared GPU infrastructure for the streaming cluster-upload
+# Shared GPU infrastructure for the streaming cluster-upload
 # pattern. This crate is at the same dep level as `ivf-index`; it is
 # itself only reached when a downstream `scorer-*` crate enables its
 # `gpu` Cargo feature. CPU-only builds never see this crate, so

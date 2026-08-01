@@ -22,7 +22,7 @@ fn main() {
     let a: Vec<f32> = (0..D).map(|_| rng.random_range(-1.0_f32..1.0)).collect();
     let b: Vec<f32> = (0..D).map(|_| rng.random_range(-1.0_f32..1.0)).collect();
 
-    println!("=== Plan 25 step 6 — l2_f32 scalar vs l2_f32_simd (d={D}) ===");
+    println!("=== l2_f32 scalar vs l2_f32_simd (d={D}) ===");
     let scalar_one = l2_f32(&a, &b);
     let simd_one = l2_f32_simd(&a, &b);
     let rel_err = (scalar_one - simd_one).abs() / scalar_one.abs();
@@ -71,7 +71,7 @@ fn main() {
 
     if speedup > 1.0 {
         println!(
-            "RECOMMEND: wire l2_f32_simd into l2_f32 via cfg dispatcher (per Plan 25 step 6 + Decision 2)."
+            "RECOMMEND: wire l2_f32_simd into l2_f32 via cfg dispatcher."
         );
         std::process::exit(0);
     } else {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs the GPU paper-eval bundle on a GPU pod (the subset of evals that
-# exercise the cuVS / custom-CUDA paths per Plan 17 / ADR 008) and
+# exercise the cuVS / custom-CUDA paths) and
 # Slack-posts at start, per phase start/finish, on each phase failure,
 # and on overall completion. Designed to be the argument to
 # deploy/runai-submit-gpu-cloud.sh (or deploy/runai-submit.sh directly).
@@ -94,7 +94,7 @@ echo "===> $(date -Iseconds) GPU SKU=${GPU_SKU_CLOUD} provider=${PROVIDER} insta
 
 # ── tiptoe-go pin (mirror run-bundle.sh) ───────────────────────────────
 # Not strictly required by the GPU bundle today (eval-gpu-cloud routes
-# through eval-no-tiptoe and skips Tiptoe entirely per ADR 008 § 6),
+# through eval-no-tiptoe and skips Tiptoe entirely),
 # but kept here so a future operator who adds a Tiptoe-GPU path
 # doesn't trip the harness's missing-clone error mid-bundle.
 ensure_tiptoe_go() {
@@ -146,8 +146,7 @@ add_phase "make eval-gpu-cloud (V100, epfl-rcp)" \
 
 # Phase 2 — substep breakdown on GPU substrate. Threads
 # CARGO_FEATURES=gpu and full --device gpu + cloud-* fields through
-# EVAL_FLAGS (the breakdown sub-targets now accept EVAL_FLAGS per the
-# Plan 23 RCP-prep Makefile change).
+# EVAL_FLAGS (the breakdown sub-targets accept EVAL_FLAGS).
 if [ -z "${SKIP_BREAKDOWN:-}" ]; then
   GPU_EVAL_FLAGS="--device gpu --gpu-sku ${GPU_SKU_CLOUD} --gpu-location cloud --cloud-provider ${PROVIDER} --cloud-instance-type ${INSTANCE} --cloud-region ${REGION} --cloud-driver-version ${DRIVER_VERSION} --cloud-cuda-version ${CUDA_VERSION}"
   add_phase "make eval-breakdown-no-tiptoe (GPU)" \

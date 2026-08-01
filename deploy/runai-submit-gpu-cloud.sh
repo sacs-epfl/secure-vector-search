@@ -4,8 +4,8 @@
 # Symmetric wrapper to deploy/runai-submit-cpu.sh — sets the GPU count
 # explicitly + a recognisable job-name prefix so an operator scanning
 # `runai list jobs` can distinguish CPU-only from GPU runs at a glance.
-# Defaults match the project's RCP V100 workspace per ADR 008 § 5
-# (2026-05-12 amendment recognises V100 as the cloud-tier default).
+# Defaults match the project's RCP V100 workspace (V100 is the
+# cloud-tier default).
 #
 # Usage:
 #   deploy/runai-submit-gpu-cloud.sh deploy/run-bundle-gpu.sh
