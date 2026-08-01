@@ -4,6 +4,9 @@ Research prototype comparing five vector similarity search backends
 (Plaintext, SAP/DCPE, EMVP, Tiptoe, BN) behind a shared `Scorer` trait.
 See [`docs/design.md`](docs/design.md) for architecture, threat model, and open questions.
 
+The extended version of the paper, with appendices, is at
+[`extended-version.pdf`](extended-version.pdf).
+
 ## Crates
 
 | Crate | Role |

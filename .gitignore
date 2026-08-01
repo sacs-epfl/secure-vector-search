@@ -17,6 +17,7 @@ venv/
 /.cargo/config.toml
 Cargo.lock
 *.pdf
+!extended-version.pdf
 analysis/data/*
 !analysis/data/.gitkeep
 analysis/output/*
